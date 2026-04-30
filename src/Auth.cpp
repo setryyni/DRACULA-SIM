@@ -5,23 +5,14 @@
 #include <fstream>
 #include <string>
 #include <cstdlib>
+#include <windows.h> // Untuk Windows
 
-// Deteksi OS untuk fungsi sleep yang simpel
-#ifdef _WIN32
-    #include <windows.h> // Untuk Windows
-#else
-    #include <unistd.h>  // Untuk Linux/Mac
-#endif
 
 using namespace std;
 
 // Fungsi pembantu untuk memberi jeda waktu
 void Tunggu(int Detik) {
-    #ifdef _WIN32
-        Sleep(Detik * 1000); // Milidetik
-    #else
-        sleep(Detik); // Detik
-    #endif
+    Sleep(Detik * 1000); // Milidetik
 }
 
 bool RegisterAkun() {
@@ -29,8 +20,13 @@ bool RegisterAkun() {
     
     Utils::bersihkanLayar();
     cout << "=== PENDAFTARAN PENDONOR ===\n";
-    cout << "Masukkan Username : ";
+    cout << "Masukkan Username (Ketik '0' untuk batal): ";
     cin >> UsernameBaru;
+
+    // Batal saat input username
+    if (UsernameBaru == "0") {
+        return false; 
+    }
     
     // Cek apakah username sudah ada di database
     ifstream FileIn("data/users.txt");
@@ -44,8 +40,22 @@ bool RegisterAkun() {
     }
     FileIn.close();
 
-    cout << "Masukkan Password : ";
-    cin >> PasswordBaru;
+    // Looping sampai user memasukkan password minimal 5 karakter atau batal
+    while (true) {
+        cout << "Masukkan Password (Ketik '0' untuk batal, min. 5 karakter): ";
+        cin >> PasswordBaru;
+
+        // Batal saat input password
+        if (PasswordBaru == "0") {
+            return false; 
+        }
+
+        if (PasswordBaru.length() < 5) {
+            cout << "[!] Password terlalu pendek! Harus minimal 5 karakter.\n";
+        } else {
+            break; // Keluar dari loop jika password sudah valid
+        }
+    }
 
     // Simpan ke database (append mode)
     ofstream FileOut("data/users.txt", ios::app);
@@ -87,10 +97,28 @@ User LoginAkun() {
             cout << "[!] Login Gagal (" << Percobaan << "/" << MaksPercobaan << ")\n\n";
         }
 
-        cout << "Username : ";
+        cout << "Username (Ketik '0' untuk kembali): ";
         cin >> InputUser;
-        cout << "Password : ";
+
+        // Batal saat input username
+        if (InputUser == "0") {
+            return UserData; // Kembali ke menu awal dengan membawa UserData kosong
+        }
+
+        cout << "Password (Ketik '0' untuk kembali): ";
         cin >> InputPass;
+
+        // Batal saat input password
+        if (InputPass == "0") {
+            return UserData; 
+        }
+
+        if (InputPass.length() < 5) {
+            cout << "\n[!] Format salah. Password minimal 5 karakter!\n";
+            Percobaan++; // Tetap dihitung sebagai percobaan gagal
+            Tunggu(1);
+            continue; // Langsung ulang dari awal loop (minta username lagi)
+        }
 
         ifstream File("data/users.txt");
         if (!File.is_open()) {
@@ -102,7 +130,6 @@ User LoginAkun() {
 
         bool loginBerhasil = false;
         while (File >> UserData.Username >> UserData.Password >> UserData.Role) {
-            // Operator == pada string otomatis case-sensitive (huruf besar/kecil harus sama persis)
             if (UserData.Username == InputUser && UserData.Password == InputPass) {
                 loginBerhasil = true;
                 break;
@@ -123,6 +150,7 @@ User LoginAkun() {
         }
     }
 }
+
 
 User MulaiAuth() {
     int Pilihan;
@@ -163,4 +191,48 @@ User MulaiAuth() {
                 break;
         }
     }
+}
+
+// ==========================================
+// KODE TESTING (HAPUS NANTI KALAU SUDAH SELESAI)
+// ==========================================
+int main() {
+    // 1. Buat data dummy langsung ke file (menimpa file lama kalau ada)
+    // PENTING: Pastikan folder bernama "data" SUDAH ADA di dalam folder utama project-mu!
+    ofstream FileDummy("data/users.txt");
+    if (FileDummy.is_open()) {
+        FileDummy << "admin admin123 admin\n";
+        FileDummy << "budi budi123 pendonor\n";
+        FileDummy.close();
+    } else {
+        cout << "[!] Gagal membuat file dummy. Bikin folder 'data' dulu ya!\n";
+        Utils::tekanEnter();
+    }
+
+    // 2. Layar pembuka testing
+    Utils::bersihkanLayar();
+    cout << "========================================\n";
+    cout << "       SIMULASI TESTING MENU AUTH       \n";
+    cout << "========================================\n";
+    cout << "Data Dummy yang siap digunakan Login:\n";
+    cout << "1. User: admin | Pass: admin123 (Role: admin)\n";
+    cout << "2. User: budi  | Pass: budi123  (Role: pendonor)\n";
+    cout << "========================================\n";
+    Utils::tekanEnter();
+
+    // 3. Jalankan menu Auth
+    User HasilLogin = MulaiAuth();
+
+    // 4. Tangkap dan tampilkan data kembalian setelah login sukses
+    Utils::bersihkanLayar();
+    cout << "========================================\n";
+    cout << "            TESTING SELESAI             \n";
+    cout << "========================================\n";
+    cout << "Kamu berhasil masuk sistem sebagai:\n";
+    cout << "Username : " << HasilLogin.Username << "\n";
+    cout << "Password : " << HasilLogin.Password << "\n";
+    cout << "Role     : " << HasilLogin.Role << "\n";
+    cout << "========================================\n";
+    
+    return 0;
 }
