@@ -563,3 +563,16 @@ void AdminVerifikasiDonor(NodePendonor*& Head) {
 
     cout << "[OK] Output Status: Layak donor!\n";
 }
+
+// Tambahkan di paling bawah banget
+int main() {
+    // Inisialisasi variabel yang dibutuhkan fungsi MenuAdmin
+    NodePendonor* Head = nullptr; 
+    StokDarah Stok = {0, 0, 0, 0}; // Anggap stok awal 0 semua
+    User UserAktif = {"Admin_Testing", "admin"};
+
+    // Panggil menu admin
+    MenuAdmin(UserAktif, Head, Stok);
+
+    return 0;
+}
