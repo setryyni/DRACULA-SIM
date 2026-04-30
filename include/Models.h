@@ -24,14 +24,14 @@ struct Pendonor {
     std::string GolDarah;      // A, B, AB, O
     std::string Rhesus;        // Positif (+) atau Negatif (-)
     std::string Alamat;
-    std::string NomorTelepon;
-    std::string TglTerakhir;   // Format: YYYY-MM-DD
-    int TotalDonor;            // Jumlah total kantong yang disumbangkan
+    std::string NomorTelepon;  
+    std::string TglTerakhir;
+    int TotalDonor;
 };
 
 // 6. Struktur untuk mencatat riwayat donor (1 baris = 1 kali kegiatan donor)
 struct RiwayatDonor {
-    std::string Username;      // Kunci penghubung ke siapa yang donor
+    std::string username;           // Kunci penghubung ke siapa yang donor
     std::string TanggalDonor;  // Format: YYYY-MM-DD
     std::string Lokasi;        // Misal: "PMI_Pusat" atau "Mobile_Unit_Unlam"
     int JumlahKantong;         // Biasanya 1
@@ -52,14 +52,6 @@ struct VerifikasiMedis {
     double TekananDarah;
     double KadarHemoglobin;
     bool IsLayak;              // Hasil keputusan petugas PMI
-};
-
-// 5. Struktur untuk pendaftaran mandiri (Pre-Registration)
-struct PreRegistration {
-    std::string Nama;
-    std::string Nik;
-    std::string GolDarah;
-    std::string TglRencana;    // Tanggal rencana datang ke lokasi PMI
 };
 
 #endif
