@@ -1,8 +1,72 @@
 #include "../include/Utils.h"
-#include "../include/Auth.h"
+#include "../include/Models.h"
 #include "../include/UserPage.h"
 #include <iostream>
 using namespace std;
+
+// MENU USER
+void menuUser() {
+    int pilihan;
+    bool lanjut = true;
+
+    while (lanjut) {
+        cout << "\n================================\n";
+        cout << "      SISTEM DONOR DARAH\n";
+        cout << "          MENU USER\n";
+        cout << "================================\n";
+        cout << "1. Preregister\n";
+        cout << "2. Cek Jadwal\n";
+        cout << "3. Riwayat Donor\n";
+        cout << "4. Informasi Edukasi\n";
+        cout << "5. Logout\n";
+        cout << "================================\n";
+        cout << "Pilih menu (1-5): ";
+        
+        // Validasi input menu
+        if (!(cin >> pilihan)) {
+            cout << "[!] Input tidak valid. Masukkan angka 1-5.\n";
+            Utils::bersihkanLayar();
+            continue;
+        }
+
+        switch (pilihan) {
+            case 1:
+                preRegister();
+                break;
+            case 2:
+                cekJadwal();
+                break;
+            case 3:
+                riwayatDonor();
+                break;
+            case 4:
+                edukasi();
+                break;
+            case 5:
+                cout << "\nLogout berhasil. Sampai jumpa!\n";
+                lanjut = false;
+                return;
+            default:
+                cout << "[!] Pilihan tidak ada. Silakan masukkan angka 1-5.\n";
+                break;
+        }
+    }
+}
+
+void preRegister() {
+    cout << "\n[Pre-register] Fitur ini sedang dalam pengembangan.\n";
+    Utils::tekanEnter();
+}
+
+void cekJadwal() {
+    cout << "\n[Cek Jadwal] Fitur ini sedang dalam pengembangan.\n";
+    Utils::tekanEnter();
+}
+
+void riwayatDonor() {
+    cout << "\n[Riwayat Donor] Fitur ini sedang dalam pengembangan.\n";
+    Utils::tekanEnter();
+}
 
 // informasi syarat donor
 void edukasi() {
