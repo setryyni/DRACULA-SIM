@@ -25,8 +25,6 @@ struct Pendonor {
     std::string Rhesus;        // Positif (+) atau Negatif (-)
     std::string Alamat;
     std::string NomorTelepon;  
-    std::string TglTerakhir;
-    int TotalDonor;
 };
 
 // 6. Struktur untuk mencatat riwayat donor (1 baris = 1 kali kegiatan donor)

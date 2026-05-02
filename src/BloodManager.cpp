@@ -124,7 +124,7 @@ void SortByNamaZA(NodePendonor*& Head) {
     Head = Sorted;
 }
 
-// Bubble Sort by Role (admin dulu baru pendonor)
+// Bubble Sort by GolDarah
 void SortByRole(NodePendonor*& Head) {
     if (Head == nullptr || Head->Next == nullptr) return;
     bool Swapped;
@@ -145,7 +145,7 @@ void SortByRole(NodePendonor*& Head) {
 // SEARCHING
 // =============================================
 
-// Linear Search by Username (untuk data tidak terurut)
+// Linear Search by Username (data tidak terurut)
 NodePendonor* LinearSearchByUsername(NodePendonor* Head, const string& Username) {
     NodePendonor* Curr = Head;
     while (Curr != nullptr) {
@@ -155,12 +155,10 @@ NodePendonor* LinearSearchByUsername(NodePendonor* Head, const string& Username)
     return nullptr;
 }
 
-// Binary Search by Nama (untuk data yang sudah terurut A-Z)
-// Konversi linked list ke array dulu untuk binary search
+// Binary Search by Nama (data harus terurut A-Z)
 NodePendonor* BinarySearchByNama(NodePendonor* SortedHead, const string& Nama, int Size) {
     if (SortedHead == nullptr || Size == 0) return nullptr;
 
-    // Masukkan semua pointer ke array
     NodePendonor** Arr = new NodePendonor*[Size];
     NodePendonor* Curr = SortedHead;
     for (int i = 0; i < Size; i++) {
@@ -187,6 +185,7 @@ NodePendonor* BinarySearchByNama(NodePendonor* SortedHead, const string& Nama, i
 
 // =============================================
 // FILE I/O PENDONOR
+// Format: Username|Nik|Nama|GolDarah|Rhesus|Alamat|NomorTelepon
 // =============================================
 
 void MuatPendonorDariFile(NodePendonor*& Head) {
@@ -198,17 +197,13 @@ void MuatPendonorDariFile(NodePendonor*& Head) {
         if (Line.empty()) continue;
         istringstream Iss(Line);
         Pendonor P;
-        string TotalStr;
-        getline(Iss, P.Username,      '|');
-        getline(Iss, P.Nik,           '|');
-        getline(Iss, P.Nama,          '|');
-        getline(Iss, P.GolDarah,      '|');
-        getline(Iss, P.Rhesus,        '|');
-        getline(Iss, P.Alamat,        '|');
-        getline(Iss, P.NomorTelepon,  '|');
-        getline(Iss, P.TglTerakhir,   '|');
-        getline(Iss, TotalStr);
-        P.TotalDonor = TotalStr.empty() ? 0 : stoi(TotalStr);
+        getline(Iss, P.Username,     '|');
+        getline(Iss, P.Nik,          '|');
+        getline(Iss, P.Nama,         '|');
+        getline(Iss, P.GolDarah,     '|');
+        getline(Iss, P.Rhesus,       '|');
+        getline(Iss, P.Alamat,       '|');
+        getline(Iss, P.NomorTelepon);
         TambahPendonor(Head, P);
     }
     File.close();
@@ -226,9 +221,7 @@ void SimpanPendonorKeFile(NodePendonor* Head) {
              << P.GolDarah     << "|"
              << P.Rhesus       << "|"
              << P.Alamat       << "|"
-             << P.NomorTelepon << "|"
-             << P.TglTerakhir  << "|"
-             << P.TotalDonor   << "\n";
+             << P.NomorTelepon << "\n";
         Curr = Curr->Next;
     }
     File.close();
@@ -236,6 +229,7 @@ void SimpanPendonorKeFile(NodePendonor* Head) {
 
 // =============================================
 // STOK DARAH
+// Format: A|B|AB|O
 // =============================================
 
 StokDarah MuatStokDariFile() {
@@ -301,7 +295,60 @@ bool StokKosong(const StokDarah& Stok) {
 }
 
 // =============================================
-// RIWAYAT & VALIDASI
+// RIWAYAT DONOR
+// Format: Username|TanggalDonor|Lokasi|JumlahKantong|Keterangan
+// =============================================
+
+void TambahRiwayat(const RiwayatDonor& Riwayat) {
+    ofstream File("data/Riwayat.txt", ios::app);
+    if (!File.is_open()) return;
+    File << Riwayat.username      << "|"
+         << Riwayat.TanggalDonor  << "|"
+         << Riwayat.Lokasi        << "|"
+         << Riwayat.JumlahKantong << "|"
+         << Riwayat.Keterangan    << "\n";
+    File.close();
+}
+
+// Ambil tanggal donor terakhir dari Riwayat.txt by Username
+// Baca semua baris, ambil yang terakhir cocok
+string AmbilTglTerakhir(const string& Username) {
+    ifstream File("data/Riwayat.txt");
+    if (!File.is_open()) return "-";
+
+    string Line, TglTerakhir = "-";
+    while (getline(File, Line)) {
+        if (Line.empty()) continue;
+        istringstream Iss(Line);
+        string U, Tgl, Lok, Jml, Ket;
+        getline(Iss, U,   '|');
+        getline(Iss, Tgl, '|');
+        if (U == Username) TglTerakhir = Tgl;
+    }
+    File.close();
+    return TglTerakhir;
+}
+
+// Hitung total donor dari Riwayat.txt by Username
+int HitungTotalDonor(const string& Username) {
+    ifstream File("data/Riwayat.txt");
+    if (!File.is_open()) return 0;
+
+    int Total = 0;
+    string Line;
+    while (getline(File, Line)) {
+        if (Line.empty()) continue;
+        istringstream Iss(Line);
+        string U;
+        getline(Iss, U, '|');
+        if (U == Username) Total++;
+    }
+    File.close();
+    return Total;
+}
+
+// =============================================
+// VALIDASI
 // =============================================
 
 bool ValidasiTanggal(const string& Tanggal) {
@@ -335,16 +382,6 @@ int HitungSelisihHari(const string& TglTerakhir) {
     return (int)(difftime(Now, TDonor) / 86400);
 }
 
-bool UpdateRiwayatDonor(NodePendonor*& Head, const string& Username, const string& TglBaru) {
-    NodePendonor* Node = CariPendonorByUsername(Head, Username);
-    if (Node == nullptr) return false;
-    Node->Data.TglTerakhir = TglBaru;
-    Node->Data.TotalDonor++;
-    SimpanPendonorKeFile(Head);
-    return true;
-}
-
-// Cek username sudah ada di users.txt (nyambung sama Auth.cpp)
 bool CekUsernameAdaDiFile(const string& Username) {
     ifstream File("data/Users.txt");
     if (!File.is_open()) return false;

@@ -10,7 +10,7 @@ using namespace std;
 // =============================================
 // HELPER
 // =============================================
-static void CetakHeaderTabel() {
+void CetakHeaderTabel() {
     cout << left
          << setw(4)  << "No"
          << setw(15) << "Username"
@@ -18,13 +18,11 @@ static void CetakHeaderTabel() {
          << setw(5)  << "Gol"
          << setw(5)  << "Rhs"
          << setw(13) << "No. Telp"
-         << setw(12) << "Tgl Donor"
-         << setw(6)  << "Total"
          << "\n";
-    cout << string(80, '-') << "\n";
+    cout << string(62, '-') << "\n";
 }
 
-static void CetakBarisPendonor(int No, const Pendonor& P) {
+void CetakBarisPendonor(int No, const Pendonor& P) {
     cout << left
          << setw(4)  << No
          << setw(15) << P.Username
@@ -32,12 +30,10 @@ static void CetakBarisPendonor(int No, const Pendonor& P) {
          << setw(5)  << P.GolDarah
          << setw(5)  << P.Rhesus
          << setw(13) << P.NomorTelepon
-         << setw(12) << (P.TglTerakhir.empty() || P.TglTerakhir == "-" ? "-" : P.TglTerakhir)
-         << setw(6)  << P.TotalDonor
          << "\n";
 }
 
-static void TampilSemuaPendonor(NodePendonor* Head) {
+void TampilSemuaPendonor(NodePendonor* Head) {
     CetakHeaderTabel();
     NodePendonor* Curr = Head;
     int No = 1;
@@ -109,30 +105,31 @@ void AdminTambahAkun(NodePendonor*& Head) {
         string Username, Password, Role;
         cin.ignore();
 
-        // Input Username + cek sudah ada (LOOP) + opsi batal
+        // Input Username: tidak boleh kosong + cek duplikat + cancel
         while (true) {
             cout << "Username : ";
             getline(cin, Username);
-            if (Username == "0") {
-                cout << "[!] Dibatalkan.\n";
-                return;
-            }
+            if (Username == "0") { cout << "[!] Dibatalkan.\n"; return; }
+            if (Username.empty()) { cout << "[!] Username tidak boleh kosong!\n"; continue; }
             if (!CekUsernameAdaDiFile(Username)) break;
             cout << "[!] Username sudah terdaftar! Coba username lain.\n";
         }
 
-        cout << "Password : ";
-        getline(cin, Password);
-        if (Password == "0") { cout << "[!] Dibatalkan.\n"; return; }
+        // Input Password: tidak boleh kosong + minimal 5 karakter + cancel
+        while (true) {
+            cout << "Password (min. 5 karakter) : ";
+            getline(cin, Password);
+            if (Password == "0") { cout << "[!] Dibatalkan.\n"; return; }
+            if (Password.empty()) { cout << "[!] Password tidak boleh kosong!\n"; continue; }
+            if (Password.length() < 5) { cout << "[!] Password minimal 5 karakter!\n"; continue; }
+            break;
+        }
 
-        // Input Role + validasi (LOOP) + opsi batal
+        // Input Role + validasi + cancel
         while (true) {
             cout << "Role (user/admin) : ";
             getline(cin, Role);
-            if (Role == "0") {
-                cout << "[!] Dibatalkan.\n";
-                return;
-            }
+            if (Role == "0") { cout << "[!] Dibatalkan.\n"; return; }
             if (Role == "user" || Role == "admin") break;
             cout << "[!] Role tidak valid! Masukkan 'user' atau 'admin'.\n";
         }
@@ -147,35 +144,89 @@ void AdminTambahAkun(NodePendonor*& Head) {
         // Kalau role = user, langsung isi data diri pendonor
         if (Role == "user") {
             Pendonor P;
-            P.Username    = Username;
-            P.TglTerakhir = "-";
-            P.TotalDonor  = 0;
+            P.Username = Username;
 
             cout << "\n--- Isi Data Diri Pendonor ---\n";
 
-            cout << "NIK (16 digit)      : ";
-            getline(cin, P.Nik);
-
-            cout << "Nama Lengkap        : ";
-            getline(cin, P.Nama);
-            if (P.Nama.empty()) P.Nama = Username;
-
-            // Validasi Gol Darah
+            // Input NIK: harus 16 digit angka
             while (true) {
-                cout << "Gol. Darah (A/B/AB/O): ";
+                cout << "NIK (16 digit) : ";
+                getline(cin, P.Nik);
+                if (P.Nik.length() != 16) {
+                    cout << "[!] NIK harus 16 digit!\n";
+                    continue;
+                }
+                bool SemuaAngka = true;
+                for (char c : P.Nik) {
+                    if (!isdigit(c)) { SemuaAngka = false; break; }
+                }
+                if (!SemuaAngka) { cout << "[!] NIK harus berupa angka!\n"; continue; }
+                break;
+            }
+
+            // Input Nama: tidak boleh kosong
+            while (true) {
+                cout << "Nama Lengkap   : ";
+                getline(cin, P.Nama);
+                if (!P.Nama.empty()) break;
+                cout << "[!] Nama tidak boleh kosong!\n";
+            }
+
+            // Input Gol Darah: validasi A/B/AB/O
+            while (true) {
+                cout << "Gol. Darah (A/B/AB/O) : ";
                 getline(cin, P.GolDarah);
                 if (ValidasiGolDarah(P.GolDarah)) break;
                 cout << "[!] Golongan darah tidak valid!\n";
             }
 
-            cout << "Rhesus (+/-)        : ";
-            getline(cin, P.Rhesus);
+            // Input Rhesus: harus + atau -
+            while (true) {
+                cout << "Rhesus (+/-) : ";
+                getline(cin, P.Rhesus);
+                if (P.Rhesus == "+" || P.Rhesus == "-") break;
+                cout << "[!] Rhesus harus '+' atau '-'!\n";
+            }
 
-            cout << "Alamat              : ";
-            getline(cin, P.Alamat);
+            // Input Alamat: tidak boleh kosong
+            while (true) {
+                cout << "Alamat : ";
+                getline(cin, P.Alamat);
+                if (!P.Alamat.empty()) break;
+                cout << "[!] Alamat tidak boleh kosong!\n";
+            }
 
-            cout << "Nomor Telepon       : ";
-            getline(cin, P.NomorTelepon);
+            // Input Nomor Telepon: tidak boleh kosong
+            while (true) {
+                cout << "Nomor Telepon : ";
+                getline(cin, P.NomorTelepon);
+                if (!P.NomorTelepon.empty()) break;
+                cout << "[!] Nomor telepon tidak boleh kosong!\n";
+            }
+
+            // Pertanyaan riwayat donor sebelumnya
+            char PernaDonor;
+            cout << "\nPernah donor sebelumnya? (y/n) : ";
+            cin >> PernaDonor;
+            cin.ignore();
+
+            if (PernaDonor == 'y' || PernaDonor == 'Y') {
+                string TglTerakhir;
+                // Input tanggal donor terakhir + validasi
+                while (true) {
+                    cout << "Tanggal donor terakhir (YYYY-MM-DD) : ";
+                    getline(cin, TglTerakhir);
+                    if (ValidasiTanggal(TglTerakhir)) break;
+                    cout << "[!] Format tanggal salah! Gunakan YYYY-MM-DD.\n";
+                }
+
+                // Simpan ke Riwayat.txt sebagai data historis
+                ofstream FileRiwayat("data/Riwayat.txt", ios::app);
+                if (FileRiwayat.is_open()) {
+                    FileRiwayat << Username << "|" << TglTerakhir << "|PMI|1|Data historis sebelum daftar\n";
+                    FileRiwayat.close();
+                }
+            }
 
             TambahPendonor(Head, P);
             SimpanPendonorKeFile(Head);
@@ -350,7 +401,30 @@ void AdminUpdateRiwayat(NodePendonor*& Head) {
         cout << "[!] Format tanggal salah! Gunakan YYYY-MM-DD.\n";
     }
 
-    UpdateRiwayatDonor(Head, Username, TglBaru);
+    // Input lokasi donor
+    string Lokasi;
+    cout << "Input Lokasi donor (contoh: PMI_Pusat) : ";
+    getline(cin, Lokasi);
+    if (Lokasi.empty()) Lokasi = "PMI";
+
+    // Input keterangan
+    string Keterangan;
+    while (true) {
+        cout << "Keterangan (Sukses/Ditolak)           : ";
+        getline(cin, Keterangan);
+        if (Keterangan == "Sukses" || Keterangan == "Ditolak") break;
+        cout << "[!] Keterangan harus 'Sukses' atau 'Ditolak'!\n";
+    }
+
+    // Simpan ke Riwayat.txt
+    RiwayatDonor R;
+    R.username      = Username;
+    R.TanggalDonor  = TglBaru;
+    R.Lokasi        = Lokasi;
+    R.JumlahKantong = 1;
+    R.Keterangan    = Keterangan;
+    TambahRiwayat(R);
+
     cout << "\n[OK] Riwayat berhasil diperbarui!\n";
 }
 
@@ -604,9 +678,9 @@ void AdminVerifikasiDonor(NodePendonor*& Head) {
 
     cout << "[OK] Kondisi medis: Normal\n";
 
-    // Cek tgl donor ada dan < 90 hari
-    string TglTerakhir = Node->Data.TglTerakhir;
-    if (!TglTerakhir.empty() && TglTerakhir != "-") {
+    // Ambil tanggal terakhir dari Riwayat.txt
+    string TglTerakhir = AmbilTglTerakhir(Username);
+    if (TglTerakhir != "-") {
         int Selisih = HitungSelisihHari(TglTerakhir);
         if (Selisih < 90) {
             int SisaHari = 90 - Selisih;
@@ -618,36 +692,10 @@ void AdminVerifikasiDonor(NodePendonor*& Head) {
     }
 
     cout << "[OK] Output Status: LAYAK DONOR!\n";
-    if (!TglTerakhir.empty() && TglTerakhir != "-") {
+    if (TglTerakhir != "-") {
         cout << "     Donor terakhir: " << TglTerakhir
              << " (" << HitungSelisihHari(TglTerakhir) << " hari lalu)\n";
     } else {
         cout << "     Belum pernah donor sebelumnya.\n";
     }
-}
-// =============================================
-// TEST / DUMMY - HAPUS SEBELUM SUBMIT
-// =============================================
-int main() {
-    User UserAktif;
-    UserAktif.Username = "admin";
-    UserAktif.Role     = "admin";
-
-    NodePendonor* Head = nullptr;
-
-    StokDarah Stok;
-    Stok.StokA  = 10;
-    Stok.StokB  = 5;
-    Stok.StokAB = 3;
-    Stok.StokO  = 8;
-
-    MenuAdmin(UserAktif, Head, Stok);
-
-    while (Head != nullptr) {
-        NodePendonor* Del = Head;
-        Head = Head->Next;
-        delete Del;
-    }
-
-    return 0;
 }

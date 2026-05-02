@@ -6,7 +6,7 @@
 
 /**
  * File: BloodManager.h
- * Deskripsi: Mengelola data pendonor (linked list) dan stok darah.
+ * Deskripsi: Mengelola data pendonor (linked list), stok darah, dan riwayat donor.
  */
 
 // =============================================
@@ -42,7 +42,7 @@ NodePendonor* LinearSearchByUsername(NodePendonor* Head, const std::string& User
 NodePendonor* BinarySearchByNama(NodePendonor* SortedHead, const std::string& Nama, int Size);
 
 // =============================================
-// FILE I/O
+// FILE I/O PENDONOR
 // =============================================
 void MuatPendonorDariFile(NodePendonor*& Head);
 void SimpanPendonorKeFile(NodePendonor* Head);
@@ -58,10 +58,24 @@ int GetStok(const StokDarah& Stok, const std::string& GolDarah);
 bool StokKosong(const StokDarah& Stok);
 
 // =============================================
-// RIWAYAT & VALIDASI
+// RIWAYAT DONOR
 // =============================================
-bool UpdateRiwayatDonor(NodePendonor*& Head, const std::string& Username, const std::string& TglBaru);
+
+// Tambah 1 baris riwayat baru ke Riwayat.txt
+void TambahRiwayat(const RiwayatDonor& Riwayat);
+
+// Ambil tanggal donor terakhir pendonor dari Riwayat.txt (buat verifikasi)
+std::string AmbilTglTerakhir(const std::string& Username);
+
+// Hitung total donor pendonor dari Riwayat.txt
+int HitungTotalDonor(const std::string& Username);
+
+// Hitung selisih hari dari tanggal donor terakhir sampai hari ini
 int HitungSelisihHari(const std::string& TglTerakhir);
+
+// =============================================
+// VALIDASI
+// =============================================
 bool ValidasiTanggal(const std::string& Tanggal);
 bool ValidasiGolDarah(const std::string& GolDarah);
 bool CekUsernameAdaDiFile(const std::string& Username);
