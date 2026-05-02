@@ -190,7 +190,7 @@ NodePendonor* BinarySearchByNama(NodePendonor* SortedHead, const string& Nama, i
 // =============================================
 
 void MuatPendonorDariFile(NodePendonor*& Head) {
-    ifstream File("data/pendonor.txt");
+    ifstream File("data/Pendonor.txt");
     if (!File.is_open()) return;
 
     string Line;
@@ -215,7 +215,7 @@ void MuatPendonorDariFile(NodePendonor*& Head) {
 }
 
 void SimpanPendonorKeFile(NodePendonor* Head) {
-    ofstream File("data/pendonor.txt");
+    ofstream File("data/Pendonor.txt");
     if (!File.is_open()) return;
     NodePendonor* Curr = Head;
     while (Curr != nullptr) {
@@ -240,7 +240,7 @@ void SimpanPendonorKeFile(NodePendonor* Head) {
 
 StokDarah MuatStokDariFile() {
     StokDarah Stok = {0, 0, 0, 0};
-    ifstream File("data/stok.txt");
+    ifstream File("data/StokDarah.txt");
     if (!File.is_open()) return Stok;
     string Line;
     if (getline(File, Line)) {
@@ -256,7 +256,7 @@ StokDarah MuatStokDariFile() {
 }
 
 void SimpanStokKeFile(const StokDarah& Stok) {
-    ofstream File("data/stok.txt");
+    ofstream File("data/StokDarah.txt");
     if (!File.is_open()) return;
     File << Stok.StokA  << "|"
          << Stok.StokB  << "|"
@@ -346,7 +346,7 @@ bool UpdateRiwayatDonor(NodePendonor*& Head, const string& Username, const strin
 
 // Cek username sudah ada di users.txt (nyambung sama Auth.cpp)
 bool CekUsernameAdaDiFile(const string& Username) {
-    ifstream File("data/users.txt");
+    ifstream File("data/Users.txt");
     if (!File.is_open()) return false;
     string U, P, R;
     while (File >> U >> P >> R) {
