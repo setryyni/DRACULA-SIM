@@ -24,7 +24,6 @@ void InitList(NodePendonor*& Head);
 void TambahPendonor(NodePendonor*& Head, const Pendonor& DataBaru);
 bool HapusPendonor(NodePendonor*& Head, const std::string& Username);
 NodePendonor* CariPendonorByUsername(NodePendonor* Head, const std::string& Username);
-NodePendonor* CariPendonorByNama(NodePendonor* Head, const std::string& Nama);
 int HitungPendonor(NodePendonor* Head);
 bool ListKosong(NodePendonor* Head);
 
@@ -33,12 +32,11 @@ bool ListKosong(NodePendonor* Head);
 // =============================================
 void SortByNamaAZ(NodePendonor*& Head);   // Selection Sort
 void SortByNamaZA(NodePendonor*& Head);   // Insertion Sort
-void SortByRole(NodePendonor*& Head);     // Bubble Sort
+void SortByRole(NodePendonor*& Head);     // Bubble Sort by Gol. Darah
 
 // =============================================
 // SEARCHING
 // =============================================
-NodePendonor* LinearSearchByUsername(NodePendonor* Head, const std::string& Username);
 NodePendonor* BinarySearchByNama(NodePendonor* SortedHead, const std::string& Nama, int Size);
 
 // =============================================

@@ -62,14 +62,7 @@ NodePendonor* CariPendonorByUsername(NodePendonor* Head, const string& Username)
     return nullptr;
 }
 
-NodePendonor* CariPendonorByNama(NodePendonor* Head, const string& Nama) {
-    NodePendonor* Curr = Head;
-    while (Curr != nullptr) {
-        if (Curr->Data.Nama == Nama) return Curr;
-        Curr = Curr->Next;
-    }
-    return nullptr;
-}
+
 
 int HitungPendonor(NodePendonor* Head) {
     int Count = 0;
@@ -145,19 +138,13 @@ void SortByRole(NodePendonor*& Head) {
 // SEARCHING
 // =============================================
 
-// Linear Search by Username (data tidak terurut)
-NodePendonor* LinearSearchByUsername(NodePendonor* Head, const string& Username) {
-    NodePendonor* Curr = Head;
-    while (Curr != nullptr) {
-        if (Curr->Data.Username == Username) return Curr;
-        Curr = Curr->Next;
-    }
-    return nullptr;
-}
-
-// Binary Search by Nama (data harus terurut A-Z)
+// Binary Search by Nama (data harus terurut A-Z, case-insensitive)
 NodePendonor* BinarySearchByNama(NodePendonor* SortedHead, const string& Nama, int Size) {
     if (SortedHead == nullptr || Size == 0) return nullptr;
+
+    // Konversi query ke lowercase buat perbandingan
+    string NamaLower = Nama;
+    for (char& c : NamaLower) c = tolower(c);
 
     NodePendonor** Arr = new NodePendonor*[Size];
     NodePendonor* Curr = SortedHead;
@@ -170,10 +157,15 @@ NodePendonor* BinarySearchByNama(NodePendonor* SortedHead, const string& Nama, i
     NodePendonor* Hasil = nullptr;
     while (Lo <= Hi) {
         int Mid = (Lo + Hi) / 2;
-        if (Arr[Mid]->Data.Nama == Nama) {
+
+        // Konversi nama di array ke lowercase juga
+        string NamaMid = Arr[Mid]->Data.Nama;
+        for (char& c : NamaMid) c = tolower(c);
+
+        if (NamaMid == NamaLower) {
             Hasil = Arr[Mid];
             break;
-        } else if (Arr[Mid]->Data.Nama < Nama) {
+        } else if (NamaMid < NamaLower) {
             Lo = Mid + 1;
         } else {
             Hi = Mid - 1;
@@ -197,13 +189,15 @@ void MuatPendonorDariFile(NodePendonor*& Head) {
         if (Line.empty()) continue;
         istringstream Iss(Line);
         Pendonor P;
-        getline(Iss, P.Username,     '|');
-        getline(Iss, P.Nik,          '|');
-        getline(Iss, P.Nama,         '|');
-        getline(Iss, P.GolDarah,     '|');
-        getline(Iss, P.Rhesus,       '|');
-        getline(Iss, P.Alamat,       '|');
-        getline(Iss, P.NomorTelepon);
+        // Kalau salah satu field gagal dibaca, skip baris ini
+        if (!getline(Iss, P.Username,     '|')) continue;
+        if (!getline(Iss, P.Nik,          '|')) continue;
+        if (!getline(Iss, P.Nama,         '|')) continue;
+        if (!getline(Iss, P.GolDarah,     '|')) continue;
+        if (!getline(Iss, P.Rhesus,       '|')) continue;
+        if (!getline(Iss, P.Alamat,       '|')) continue;
+        if (!getline(Iss, P.NomorTelepon))      continue;
+        // Semua field valid, baru tambah ke linked list
         TambahPendonor(Head, P);
     }
     File.close();
@@ -237,13 +231,18 @@ StokDarah MuatStokDariFile() {
     ifstream File("data/StokDarah.txt");
     if (!File.is_open()) return Stok;
     string Line;
-    if (getline(File, Line)) {
-        istringstream Iss(Line);
-        string Val;
-        getline(Iss, Val, '|'); Stok.StokA  = stoi(Val);
-        getline(Iss, Val, '|'); Stok.StokB  = stoi(Val);
-        getline(Iss, Val, '|'); Stok.StokAB = stoi(Val);
-        getline(Iss, Val);      Stok.StokO  = stoi(Val);
+    if (getline(File, Line) && !Line.empty()) {
+        try {
+            istringstream Iss(Line);
+            string Val;
+            getline(Iss, Val, '|'); Stok.StokA  = Val.empty() ? 0 : stoi(Val);
+            getline(Iss, Val, '|'); Stok.StokB  = Val.empty() ? 0 : stoi(Val);
+            getline(Iss, Val, '|'); Stok.StokAB = Val.empty() ? 0 : stoi(Val);
+            getline(Iss, Val);      Stok.StokO  = Val.empty() ? 0 : stoi(Val);
+        } catch (...) {
+            // Kalau format file rusak, return stok 0 semua
+            Stok = {0, 0, 0, 0};
+        }
     }
     File.close();
     return Stok;
@@ -310,8 +309,7 @@ void TambahRiwayat(const RiwayatDonor& Riwayat) {
     File.close();
 }
 
-// Ambil tanggal donor terakhir dari Riwayat.txt by Username
-// Baca semua baris, ambil yang terakhir cocok
+// Ambil tanggal donor terakhir yang SUKSES dari Riwayat.txt by Username
 string AmbilTglTerakhir(const string& Username) {
     ifstream File("data/Riwayat.txt");
     if (!File.is_open()) return "-";
@@ -323,7 +321,11 @@ string AmbilTglTerakhir(const string& Username) {
         string U, Tgl, Lok, Jml, Ket;
         getline(Iss, U,   '|');
         getline(Iss, Tgl, '|');
-        if (U == Username) TglTerakhir = Tgl;
+        getline(Iss, Lok, '|');
+        getline(Iss, Jml, '|');
+        getline(Iss, Ket);
+        // Hanya hitung donor yang berhasil (Sukses)
+        if (U == Username && Ket == "Sukses") TglTerakhir = Tgl;
     }
     File.close();
     return TglTerakhir;
@@ -364,6 +366,16 @@ bool ValidasiTanggal(const string& Tanggal) {
     if (Bulan < 1 || Bulan > 12) return false;
     if (Hari  < 1 || Hari  > 31) return false;
     if (Tahun < 2000)             return false;
+
+    // Cek tidak boleh tanggal masa depan
+    time_t Now = time(nullptr);
+    tm TmInput = {};
+    TmInput.tm_year = Tahun - 1900;
+    TmInput.tm_mon  = Bulan - 1;
+    TmInput.tm_mday = Hari;
+    time_t TInput = mktime(&TmInput);
+    if (TInput > Now) return false;
+
     return true;
 }
 
@@ -379,7 +391,10 @@ int HitungSelisihHari(const string& TglTerakhir) {
     TmDonor.tm_mon  = Bulan - 1;
     TmDonor.tm_mday = Hari;
     time_t TDonor = mktime(&TmDonor);
-    return (int)(difftime(Now, TDonor) / 86400);
+
+    int Selisih = (int)(difftime(Now, TDonor) / 86400);
+    // Kalau negatif (tanggal masa depan), return 0 biar dianggap belum cukup
+    return Selisih < 0 ? 0 : Selisih;
 }
 
 bool CekUsernameAdaDiFile(const string& Username) {

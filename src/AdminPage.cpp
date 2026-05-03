@@ -2,6 +2,7 @@
 #include "../include/Utils.h"
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <iomanip>
 #include <limits>
 
@@ -97,13 +98,13 @@ void MenuAdmin(const User& UserAktif, NodePendonor*& Head, StokDarah& Stok) {
 void AdminTambahAkun(NodePendonor*& Head) {
     bool TambahLagi = true;
 
+    cin.ignore(); // flush buffer sekali di awal, sebelum loop
     while (TambahLagi) {
         Utils::bersihkanLayar();
         cout << "=== TAMBAH AKUN ===\n";
         cout << "(ketik '0' untuk batal)\n\n";
 
         string Username, Password, Role;
-        cin.ignore();
 
         // Input Username: tidak boleh kosong + cek duplikat + cancel
         while (true) {
@@ -204,11 +205,16 @@ void AdminTambahAkun(NodePendonor*& Head) {
                 cout << "[!] Nomor telepon tidak boleh kosong!\n";
             }
 
-            // Pertanyaan riwayat donor sebelumnya
+            // Pertanyaan riwayat donor sebelumnya + validasi y/n
             char PernaDonor;
-            cout << "\nPernah donor sebelumnya? (y/n) : ";
-            cin >> PernaDonor;
-            cin.ignore();
+            while (true) {
+                cout << "\nPernah donor sebelumnya? (y/n) : ";
+                cin >> PernaDonor;
+                cin.ignore();
+                if (PernaDonor == 'y' || PernaDonor == 'Y' ||
+                    PernaDonor == 'n' || PernaDonor == 'N') break;
+                cout << "[!] Input harus 'y' atau 'n'!\n";
+            }
 
             if (PernaDonor == 'y' || PernaDonor == 'Y') {
                 string TglTerakhir;
@@ -217,7 +223,7 @@ void AdminTambahAkun(NodePendonor*& Head) {
                     cout << "Tanggal donor terakhir (YYYY-MM-DD) : ";
                     getline(cin, TglTerakhir);
                     if (ValidasiTanggal(TglTerakhir)) break;
-                    cout << "[!] Format tanggal salah! Gunakan YYYY-MM-DD.\n";
+                    cout << "[!] Tanggal tidak valid! Pastikan format YYYY-MM-DD dan bukan tanggal masa depan.\n";
                 }
 
                 // Simpan ke Riwayat.txt sebagai data historis
@@ -235,8 +241,13 @@ void AdminTambahAkun(NodePendonor*& Head) {
         cout << "\n[OK] Akun berhasil ditambahkan!\n";
 
         char Jawab;
-        cout << "Tambah akun lagi? (y/n): ";
-        cin >> Jawab;
+        while (true) {
+            cout << "Tambah akun lagi? (y/n): ";
+            cin >> Jawab;
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            if (Jawab == 'y' || Jawab == 'Y' || Jawab == 'n' || Jawab == 'N') break;
+            cout << "[!] Input harus 'y' atau 'n'!\n";
+        }
         TambahLagi = (Jawab == 'y' || Jawab == 'Y');
     }
 }
@@ -257,10 +268,16 @@ void AdminTampilkanAkun(NodePendonor*& Head) {
     cout << "1. Tampil Semua Akun (User/Admin)\n";
     cout << "2. Sort Nama A-Z   (Selection Sort)\n";
     cout << "3. Sort Nama Z-A   (Insertion Sort)\n";
-    cout << "4. Sort by Role    (Bubble Sort)\n";
+    cout << "4. Sort by Gol. Darah (Bubble Sort)\n";
     cout << "0. Kembali\n";
     cout << "Input pilihan: ";
-    cin >> Pilihan;
+
+    if (!(cin >> Pilihan)) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "[!] Input tidak valid!\n";
+        return;
+    }
 
     if (Pilihan == 0) return;
 
@@ -285,7 +302,7 @@ void AdminTampilkanAkun(NodePendonor*& Head) {
             getline(cin, Query);
             if (Query == "0") return;
 
-            NodePendonor* Hasil = LinearSearchByUsername(Head, Query);
+            NodePendonor* Hasil = CariPendonorByUsername(Head, Query);
             if (Hasil != nullptr) {
                 cout << "\n=== Hasil Pencarian ===\n";
                 CetakHeaderTabel();
@@ -307,7 +324,7 @@ void AdminTampilkanAkun(NodePendonor*& Head) {
         string JudulSort;
         if      (Pilihan == 2) { SortByNamaAZ(SortHead); JudulSort = "A-Z (Selection Sort)"; }
         else if (Pilihan == 3) { SortByNamaZA(SortHead); JudulSort = "Z-A (Insertion Sort)"; }
-        else                   { SortByRole(SortHead);   JudulSort = "by Role (Bubble Sort)"; }
+        else                   { SortByRole(SortHead);   JudulSort = "by Gol. Darah (Bubble Sort)"; }
 
         Utils::bersihkanLayar();
         cout << "=== DAFTAR AKUN TERURUT " << JudulSort << " ===\n";
@@ -398,14 +415,17 @@ void AdminUpdateRiwayat(NodePendonor*& Head) {
             return;
         }
         if (ValidasiTanggal(TglBaru)) break;
-        cout << "[!] Format tanggal salah! Gunakan YYYY-MM-DD.\n";
+        cout << "[!] Tanggal tidak valid! Pastikan format YYYY-MM-DD dan bukan tanggal masa depan.\n";
     }
 
-    // Input lokasi donor
+    // Input lokasi donor - tidak boleh kosong
     string Lokasi;
-    cout << "Input Lokasi donor (contoh: PMI_Pusat) : ";
-    getline(cin, Lokasi);
-    if (Lokasi.empty()) Lokasi = "PMI";
+    while (true) {
+        cout << "Input Lokasi donor (contoh: PMI_Pusat) : ";
+        getline(cin, Lokasi);
+        if (!Lokasi.empty()) break;
+        cout << "[!] Lokasi tidak boleh kosong!\n";
+    }
 
     // Input keterangan
     string Keterangan;
@@ -440,6 +460,7 @@ void AdminHapusPendonor(NodePendonor*& Head) {
         return;
     }
 
+    // Tampil semua pendonor dulu biar admin tau mau hapus siapa
     TampilSemuaPendonor(Head);
     cout << "(ketik '0' untuk batal)\n";
 
@@ -472,7 +493,7 @@ void AdminHapusPendonor(NodePendonor*& Head) {
     HapusPendonor(Head, Username);
     SimpanPendonorKeFile(Head);
 
-    // Hapus dari Users.txt juga (nyambung sama Auth.cpp)
+    // Hapus dari Users.txt
     ifstream FileIn("data/Users.txt");
     ofstream FileTmp("data/Users_tmp.txt");
     string U, P, R;
@@ -483,6 +504,22 @@ void AdminHapusPendonor(NodePendonor*& Head) {
     FileTmp.close();
     remove("data/Users.txt");
     rename("data/Users_tmp.txt", "data/Users.txt");
+
+    // Hapus riwayat dari Riwayat.txt juga biar gak ada data orphan
+    ifstream FileRIn("data/Riwayat.txt");
+    ofstream FileRTmp("data/Riwayat_tmp.txt");
+    string Line;
+    while (getline(FileRIn, Line)) {
+        if (Line.empty()) continue;
+        istringstream Iss(Line);
+        string UName;
+        getline(Iss, UName, '|');
+        if (UName != Username) FileRTmp << Line << "\n";
+    }
+    FileRIn.close();
+    FileRTmp.close();
+    remove("data/Riwayat.txt");
+    rename("data/Riwayat_tmp.txt", "data/Riwayat.txt");
 
     cout << "\n[OK] Data berhasil dihapus!\n";
 }
@@ -642,17 +679,34 @@ void AdminVerifikasiDonor(NodePendonor*& Head) {
             return;
         }
         if (CariPendonorByUsername(Head, Username) != nullptr) break;
-        cout << "[!] Username tidak ditemukan! Coba lagi.\n";
+        cout << "[!] Username tidak ditemukan di data pendonor!\n";
+        cout << "    (Akun admin tidak bisa diverifikasi, pastikan username pendonor)\n";
+    }
+    cout << "\nInput data medis:\n";
+
+    while (true) {
+        cout << "Sistolik   (100-140 mmHg) : ";
+        if (cin >> Sistolik && Sistolik >= 50 && Sistolik <= 250) break;
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "[!] Input tidak valid! Sistolik harus angka antara 50-250.\n";
     }
 
-    // Input data medis
-    cout << "\nInput data medis:\n";
-    cout << "Sistolik   (100-140 mmHg) : ";
-    cin >> Sistolik;
-    cout << "Diastolik  (60-90 mmHg)   : ";
-    cin >> Diastolik;
-    cout << "Hemoglobin (>=12.5 g/dL)  : ";
-    cin >> Hemoglobin;
+    while (true) {
+        cout << "Diastolik  (60-90 mmHg)   : ";
+        if (cin >> Diastolik && Diastolik >= 30 && Diastolik <= 150) break;
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "[!] Input tidak valid! Diastolik harus angka antara 30-150.\n";
+    }
+
+    while (true) {
+        cout << "Hemoglobin (>=12.5 g/dL)  : ";
+        if (cin >> Hemoglobin && Hemoglobin >= 1 && Hemoglobin <= 25) break;
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "[!] Input tidak valid! Hemoglobin harus angka antara 1-25.\n";
+    }
     cin.ignore();
 
     NodePendonor* Node = CariPendonorByUsername(Head, Username);
@@ -680,22 +734,22 @@ void AdminVerifikasiDonor(NodePendonor*& Head) {
 
     // Ambil tanggal terakhir dari Riwayat.txt
     string TglTerakhir = AmbilTglTerakhir(Username);
-    if (TglTerakhir != "-") {
-        int Selisih = HitungSelisihHari(TglTerakhir);
-        if (Selisih < 90) {
-            int SisaHari = 90 - Selisih;
-            cout << "[X] Output Status: Ga layak donor\n";
-            cout << "    Donor terakhir: " << TglTerakhir << " (" << Selisih << " hari lalu)\n";
-            cout << "    Masih perlu " << SisaHari << " hari lagi baru boleh donor.\n";
-            return;
-        }
+    if (TglTerakhir == "-") {
+        cout << "[OK] Output Status: LAYAK DONOR!\n";
+        cout << "     Belum ada riwayat donor sebelumnya.\n";
+        return;
+    }
+
+    int Selisih = HitungSelisihHari(TglTerakhir);
+    if (Selisih < 90) {
+        int SisaHari = 90 - Selisih;
+        cout << "[X] Output Status: Ga layak donor\n";
+        cout << "    Donor terakhir: " << TglTerakhir << " (" << Selisih << " hari lalu)\n";
+        cout << "    Masih perlu " << SisaHari << " hari lagi baru boleh donor.\n";
+        return;
     }
 
     cout << "[OK] Output Status: LAYAK DONOR!\n";
-    if (TglTerakhir != "-") {
-        cout << "     Donor terakhir: " << TglTerakhir
-             << " (" << HitungSelisihHari(TglTerakhir) << " hari lalu)\n";
-    } else {
-        cout << "     Belum pernah donor sebelumnya.\n";
-    }
+    cout << "     Donor terakhir: " << TglTerakhir
+         << " (" << Selisih << " hari lalu)\n";
 }
