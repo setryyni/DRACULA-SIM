@@ -87,7 +87,7 @@ User LoginAkun() {
             cout << "  Silakan tunggu 2 menit (120 detik)...   \n";
             cout << "==========================================\n";
             
-            Tunggu(120); // Jeda 120 detik (2 menit)
+            Tunggu(60); // Jeda 120 detik (2 menit)
             Percobaan = 0; // Reset jumlah percobaan ke 0 setelah 2 menit
         }
 
