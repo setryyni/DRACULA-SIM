@@ -2,14 +2,17 @@
 #include "../include/Models.h"
 #include "../include/UserPage.h"
 #include <iostream>
+#include <fstream>
+#include <string>
 using namespace std;
 
 // MENU USER
-void menuUser() {
+void menuUser(const User& UserAktif) {
     int pilihan;
     bool lanjut = true;
 
     while (lanjut) {
+        Utils::bersihkanLayar();
         cout << "\n================================\n";
         cout << "      SISTEM DONOR DARAH\n";
         cout << "          MENU USER\n";
@@ -25,13 +28,15 @@ void menuUser() {
         // Validasi input menu
         if (!(cin >> pilihan)) {
             cout << "[!] Input tidak valid. Masukkan angka 1-5.\n";
+            cin.clear();
+            cin.ignore(1000, '\n');
             Utils::bersihkanLayar();
             continue;
         }
 
         switch (pilihan) {
             case 1:
-                preRegister();
+                dataDiri(UserAktif);
                 break;
             case 2:
                 cekJadwal();
@@ -53,13 +58,148 @@ void menuUser() {
     }
 }
 
-void preRegister() {
-    cout << "\n[Pre-register] Fitur ini sedang dalam pengembangan.\n";
-    Utils::tekanEnter();
-}
+void dataDiri(const User& UserAktif) {
+    ifstream file("data/Pendonor.txt");
+    Pendonor p;
+    bool ditemukan = false;
 
-void cekJadwal() {
-    cout << "\n[Cek Jadwal] Fitur ini sedang dalam pengembangan.\n";
+    // cek apakah sudah ada
+    while (getline(file, p.Username, '|')) {
+        getline(file, p.Nik, '|');
+        getline(file, p.Nama, '|');
+        getline(file, p.GolDarah, '|');
+        getline(file, p.Rhesus, '|');
+        getline(file, p.Alamat, '|');
+        getline(file, p.NomorTelepon);
+
+        if (p.Username == UserAktif.Username) {
+            ditemukan = true;
+
+            cout << "\n=== DATA DIRI ===\n";
+            cout << "Username       : " << p.Username << endl;
+            cout << "NIK            : " << p.Nik << endl;
+            cout << "Nama           : " << p.Nama << endl;
+            cout << "Golongan Darah : " << p.GolDarah << endl;
+            cout << "Rhesus         : " << p.Rhesus << endl;
+            cout << "Alamat         : " << p.Alamat << endl;
+            cout << "No HP          : " << p.NomorTelepon << endl;
+
+            break;
+        }
+    }
+
+    file.close();
+
+    // kalau belum ada → input + simpan
+    if (!ditemukan) {
+        cout << "\n[!] Data belum ada, silakan isi.\n";
+
+        p.Username = UserAktif.Username;
+
+        while (true) {    
+            cout << "NIK: ";
+            getline(cin, p.Nik);
+                if (p.Nik.length() != 16) {
+                    cout << "[!] NIK harus 16 digit!\n";
+                    continue;
+                }
+                bool SemuaAngka = true;
+                for (char c : p.Nik) {
+                    if (!isdigit(c)) { SemuaAngka = false; break; }
+                }
+                if (!SemuaAngka) { cout << "[!] NIK harus berupa angka!\n"; continue; }
+                break;
+            }
+
+        while (true) {
+                cout << "Nama Lengkap   : ";
+                getline(cin, p.Nama);
+                if (!p.Nama.empty()) break;
+                cout << "[!] Nama tidak boleh kosong!\n";
+            }
+
+        // Input Gol Darah: validasi A/B/AB/O
+        while (true) {
+            cout << "Gol. Darah (A/B/AB/O) : ";
+            getline(cin, p.GolDarah);
+            if (ValidasiGolDarah(p.GolDarah)) break;
+            cout << "[!] Golongan darah tidak valid!\n";
+        }
+
+        // Input Rhesus: harus + atau -
+        while (true) {
+            cout << "Rhesus (+/-) : ";
+            getline(cin, p.Rhesus);
+            if (p.Rhesus == "+" || p.Rhesus == "-") break;
+            cout << "[!] Rhesus harus '+' atau '-'!\n";
+        }
+
+        // Input Alamat: tidak boleh kosong
+        while (true) {
+            cout << "Alamat : ";
+            getline(cin, p.Alamat);
+            if (!p.Alamat.empty()) break;
+            cout << "[!] Alamat tidak boleh kosong!\n";
+        }
+
+        // Input Nomor Telepon: tidak boleh kosong
+        while (true) {
+            cout << "Nomor Telepon : ";
+            getline(cin, p.NomorTelepon);
+            if (!p.NomorTelepon.empty()) break;
+            cout << "[!] Nomor telepon tidak boleh kosong!\n";
+        }
+
+
+        // =============================
+        //   CEK RIWAYAT DONOR
+        // =============================
+        char pernahDonor;
+        while (true) {
+            cout << "\nPernah donor sebelumnya? (y/n): ";
+            cin >> pernahDonor;
+            cin.ignore(1000, '\n');
+
+            if (pernahDonor == 'y' || pernahDonor == 'Y' ||
+                pernahDonor == 'n' || pernahDonor == 'N') break;
+
+            cout << "[!] Input harus y atau n!\n";
+        }
+
+        if (pernahDonor == 'y' || pernahDonor == 'Y') {
+            string tanggal;
+
+            while (true) {
+                cout << "Tanggal donor terakhir (YYYY-MM-DD): ";
+                getline(cin, tanggal);
+
+                if (ValidasiTanggal(tanggal)) break;
+                cout << "[!] Format tanggal salah!\n";
+            }
+
+            //simpan ke Riwayat.txt
+            ofstream fileRiwayat("data/Riwayat.txt", ios::app);
+            if (fileRiwayat.is_open()) {
+                fileRiwayat << p.Username << "|"
+                            << tanggal << "|PMI|1|Data awal\n";
+                fileRiwayat.close();
+            }
+        }
+
+        //simpan ke Pendonor.txt
+        ofstream out("data/Pendonor.txt", ios::app);
+        out << p.Username << "|"
+            << p.Nik << "|"
+            << p.Nama << "|"
+            << p.GolDarah << "|"
+            << p.Rhesus << "|"
+            << p.Alamat << "|"
+            << p.NomorTelepon << endl;
+        out.close();
+
+        cout << "\n[+] Data berhasil disimpan!\n";
+    }
+
     Utils::tekanEnter();
 }
 
@@ -91,6 +231,7 @@ void edukasi() {
                 cout << "- Dalam kondisi sehat\n";
                 cout << "- Tidak sedang mengonsumsi obat tertentu\n";
                 cout << "- Jarak donor minimal 2-3 bulan\n";
+                Utils::tekanEnter();
                 break;
 
             case 2:
@@ -100,6 +241,7 @@ void edukasi() {
                 cout << "- Merangsang produksi sel darah baru\n";
                 cout << "- Mengurangi risiko kelebihan zat besi\n";
                 cout << "- Mendapatkan pemeriksaan kesehatan gratis\n";
+                Utils::tekanEnter();
                 break;
 
             case 3:
@@ -110,6 +252,7 @@ void edukasi() {
                 cout << "- Baru melakukan operasi\n";
                 cout << "- Memiliki penyakit menular (HIV, Hepatitis)\n";
                 cout << "- Sedang hamil atau menyusui\n";
+                Utils::tekanEnter();
                 break;
 
             case 4:
@@ -119,6 +262,7 @@ void edukasi() {
                 cout << "- Minum air putih yang cukup\n";
                 cout << "- Hindari alkohol\n";
                 cout << "- Jangan donor saat perut kosong\n";
+                Utils::tekanEnter();
                 break;
 
             default:

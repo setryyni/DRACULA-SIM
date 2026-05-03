@@ -3,10 +3,10 @@
 
 #include "Utils.h"
 #include "Models.h"
-#include "Auth.h"
+#include "BloodManager.h"
 
-void menuUser();
-void preRegister();
+void menuUser(const User& UserAktif);
+void dataDiri(const User& UserAktif);
 void cekJadwal();
 void riwayatDonor();
 void edukasi();
