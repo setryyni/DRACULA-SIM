@@ -3,6 +3,7 @@
 #include "../include/UserPage.h"
 #include <iostream>
 #include <fstream>
+#include <cctype>
 #include <string>
 using namespace std;
 
@@ -17,7 +18,7 @@ void menuUser(const User& UserAktif) {
         cout << "      SISTEM DONOR DARAH\n";
         cout << "          MENU USER\n";
         cout << "================================\n";
-        cout << "1. Preregister\n";
+        cout << "1. Data Diri\n";
         cout << "2. Cek Jadwal\n";
         cout << "3. Riwayat Donor\n";
         cout << "4. Informasi Edukasi\n";
@@ -30,7 +31,6 @@ void menuUser(const User& UserAktif) {
             cout << "[!] Input tidak valid. Masukkan angka 1-5.\n";
             cin.clear();
             cin.ignore(1000, '\n');
-            Utils::bersihkanLayar();
             continue;
         }
 
@@ -39,10 +39,10 @@ void menuUser(const User& UserAktif) {
                 dataDiri(UserAktif);
                 break;
             case 2:
-                cekJadwal();
+                cekJadwal(UserAktif);
                 break;
             case 3:
-                riwayatDonor();
+                riwayatDonor(UserAktif);
                 break;
             case 4:
                 edukasi();
@@ -150,10 +150,7 @@ void dataDiri(const User& UserAktif) {
             cout << "[!] Nomor telepon tidak boleh kosong!\n";
         }
 
-
-        // =============================
         //   CEK RIWAYAT DONOR
-        // =============================
         char pernahDonor;
         while (true) {
             cout << "\nPernah donor sebelumnya? (y/n): ";
@@ -203,8 +200,83 @@ void dataDiri(const User& UserAktif) {
     Utils::tekanEnter();
 }
 
-void riwayatDonor() {
-    cout << "\n[Riwayat Donor] Fitur ini sedang dalam pengembangan.\n";
+void cekJadwal(const User& UserAktif) {
+    string tglTerakhir = AmbilTglTerakhir(UserAktif.Username);
+
+    cout << "\n=== CEK JADWAL DONOR ===\n";
+
+    if (tglTerakhir == "-") {
+        cout << "[!] Belum pernah donor.\n";
+        cout << "Anda bisa langsung donor.\n";
+        Utils::tekanEnter();
+        return;
+    }
+
+    int selisih = HitungSelisihHari(tglTerakhir);
+    int batas = 60;
+
+    cout << "Donor terakhir : " << tglTerakhir << endl;
+
+    if (selisih >= batas) {
+        cout << "[+] Anda SUDAH boleh donor kembali!\n";
+    } else {
+        cout << "[-] Belum boleh donor.\n";
+        cout << "Sisa waktu: " << (batas - selisih) << " hari lagi.\n";
+    }
+
+    Utils::tekanEnter();
+}
+
+void riwayatDonor(const User& UserAktif) {
+    ifstream file("data/Riwayat.txt");
+
+    if (!file.is_open()) {
+        cout << "[!] File riwayat tidak ditemukan!\n";
+        Utils::tekanEnter();
+        return;
+    }
+
+    string username, tanggal, lokasi, jumlahStr, keterangan;
+    bool ditemukan = false;
+    int no = 1;
+
+    cout << "\n========================================\n";
+    cout << "         RIWAYAT DONOR DARAH\n";
+    cout << "========================================\n";
+
+    while (getline(file, username, '|')) {
+        getline(file, tanggal, '|');
+        getline(file, lokasi, '|');
+        getline(file, jumlahStr, '|');
+        getline(file, keterangan);
+
+        if (username == UserAktif.Username) {
+
+            // header hanya muncul kalau ada data
+            if (!ditemukan) {
+                cout << "----------------------------------------\n";
+                cout << "No | Tanggal     | Lokasi | Jumlah | Ket\n";
+                cout << "----------------------------------------\n";
+            }
+
+            ditemukan = true;
+
+            cout << no++ << " | "
+                 << tanggal << " | "
+                 << lokasi << " | "
+                 << jumlahStr << "x | "
+                 << keterangan << endl;
+        }
+    }
+
+    file.close();
+
+    if (!ditemukan) {
+        cout << "\n[!] Belum ada riwayat donor.\n";
+    } else {
+        cout << "----------------------------------------\n";
+    }
+
     Utils::tekanEnter();
 }
 
@@ -219,7 +291,13 @@ void edukasi() {
         cout << "4. Tips Sebelum Donor\n";
         cout << "0. Kembali\n";
         cout << "Pilih: ";
-        cin >> pilih;
+
+        if (!(cin >> pilih)) {
+            cout << "[!] Input tidak valid.\n";
+            cin.clear();
+            cin.ignore(1000, '\n');
+            continue;
+        }
 
         switch(pilih) {
             case 1:

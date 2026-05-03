@@ -7,8 +7,8 @@
 
 void menuUser(const User& UserAktif);
 void dataDiri(const User& UserAktif);
-void cekJadwal();
-void riwayatDonor();
+void cekJadwal(const User& UserAktif);
+void riwayatDonor(const User& UserAktif);
 void edukasi();
 
 #endif // USERPAGE_H
