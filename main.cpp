@@ -1,9 +1,9 @@
-#include "../include/Auth.h"
-#include "../include/AdminPage.h"
-#include "../include/UserPage.h"
-#include "../include/BloodManager.h"
-#include "../include/Utils.h"
-#include "../include/Models.h"
+#include "include/Auth.h"
+#include "include/AdminPage.h"
+#include "include/UserPage.h"
+#include "include/BloodManager.h"
+#include "include/Utils.h"
+#include "include/Models.h"
 #include <iostream>
 
 using namespace std;
