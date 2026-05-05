@@ -4,9 +4,9 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream> // WAJIB DITAMBAHKAN untuk membaca file CSV
 #include <cstdlib>
-#include <windows.h> // Untuk Windows
-
+#include <windows.h> 
 
 using namespace std;
 
@@ -20,47 +20,72 @@ bool RegisterAkun() {
     
     Utils::bersihkanLayar();
     cout << "=== PENDAFTARAN PENDONOR ===\n";
-    cout << "Masukkan Username (Ketik '0' untuk batal): ";
-    cin >> UsernameBaru;
-
-    // Batal saat input username
-    if (UsernameBaru == "0") {
-        return false; 
-    }
     
-    // Cek apakah username sudah ada di database
-    ifstream FileIn("data/users.txt");
-    User U;
-    while (FileIn >> U.Username >> U.Password >> U.Role) {
-        if (U.Username == UsernameBaru) {
-            cout << "\n[!] Username sudah terdaftar. Gunakan nama lain!\n";
-            FileIn.close();
-            return false;
-        }
-    }
-    FileIn.close();
+    // --- LOOP INPUT USERNAME ---
+    while (true) {
+        cout << "Masukkan Username (Ketik '0' untuk batal): ";
+        getline(cin, UsernameBaru); 
 
-    // Looping sampai user memasukkan password minimal 5 karakter atau batal
+        if (UsernameBaru.empty()) {
+            cout << "[!] Username dan password tidak boleh kosong!\n";
+            continue;
+        }
+        if (UsernameBaru.find(' ') != string::npos) {
+            cout << "[!] Username tidak boleh menggunakan spasi!\n";
+            continue;
+        }
+        break; 
+    }
+
+    if (UsernameBaru == "0") return false; 
+    
+    // Cek apakah username sudah ada di database CSV
+    ifstream FileIn("data/users.csv");
+    if (FileIn.is_open()) {
+        string barisData;
+        User U;
+        // Membaca per baris dari file CSV
+        while (getline(FileIn, barisData)) {
+            stringstream ss(barisData);
+            // Memotong data berdasarkan tanda koma (,)
+            getline(ss, U.Username, ',');
+            getline(ss, U.Password, ',');
+            getline(ss, U.Role, ',');
+
+            if (U.Username == UsernameBaru) {
+                cout << "\n[!] Username sudah terdaftar. Gunakan nama lain!\n";
+                FileIn.close();
+                return false;
+            }
+        }
+        FileIn.close();
+    }
+
+    // --- LOOP INPUT PASSWORD ---
     while (true) {
         cout << "Masukkan Password (Ketik '0' untuk batal, min. 5 karakter): ";
-        cin >> PasswordBaru;
+        getline(cin, PasswordBaru);
 
-        // Batal saat input password
-        if (PasswordBaru == "0") {
-            return false; 
+        if (PasswordBaru.empty()) {
+            cout << "[!] Username dan password tidak boleh kosong!\n";
+            continue;
         }
-
+        if (PasswordBaru.find(' ') != string::npos) {
+            cout << "[!] Password tidak boleh menggunakan spasi!\n";
+            continue;
+        }
+        if (PasswordBaru == "0") return false; 
         if (PasswordBaru.length() < 5) {
             cout << "[!] Password terlalu pendek! Harus minimal 5 karakter.\n";
-        } else {
-            break; // Keluar dari loop jika password sudah valid
+            continue;
         }
+        break; 
     }
 
-    // Simpan ke database (append mode)
-    ofstream FileOut("data/users.txt", ios::app);
+    // Simpan ke database CSV (pisahkan dengan KOMA)
+    ofstream FileOut("data/users.csv", ios::app);
     if (FileOut.is_open()) {
-        FileOut << UsernameBaru << " " << PasswordBaru << " pendonor\n";
+        FileOut << UsernameBaru << "," << PasswordBaru << ",pendonor\n";
         FileOut.close();
         cout << "\n[OK] Registrasi berhasil! Silakan login.\n";
         return true;
@@ -76,7 +101,6 @@ User LoginAkun() {
     const int MaksPercobaan = 3;
     User UserData = {"", "", ""};
 
-    // Menggunakan infinite loop agar bisa reset percobaan setelah waktu tunggu 2 menit
     while (true) {
         // Cek jika percobaan sudah mencapai 3 kali gagal
         if (Percobaan >= MaksPercobaan) {
@@ -84,11 +108,32 @@ User LoginAkun() {
             cout << "==========================================\n";
             cout << "       TERLALU BANYAK GAGAL LOGIN         \n";
             cout << "  Akun terkunci sementara demi keamanan.  \n";
-            cout << "  Silakan tunggu 2 menit (120 detik)...   \n";
-            cout << "==========================================\n";
+            cout << "==========================================\n\n";
             
-            Tunggu(60); // Jeda 120 detik (2 menit)
-            Percobaan = 0; // Reset jumlah percobaan ke 0 setelah 2 menit
+            int totalWaktu = 60;
+            int lebarBar = 30; 
+
+            for (int waktuBerjalan = 0; waktuBerjalan <= totalWaktu; waktuBerjalan++) {
+                int sisaWaktu = totalWaktu - waktuBerjalan;
+                float persentase = (float)waktuBerjalan / totalWaktu;
+                int posisiBar = lebarBar * persentase;
+
+                cout << "\r⏳ Membuka kunci: [";
+                for (int j = 0; j < lebarBar; ++j) {
+                    if (j < posisiBar) cout << "█"; 
+                    else cout << " ";               
+                }
+                cout << "] " << sisaWaktu << " detik tersisa... " << flush;
+
+                if (waktuBerjalan < totalWaktu) Tunggu(1); 
+            }
+            
+            cout << "\n\n[OK] Kunci terbuka. Silakan coba lagi.\n";
+            Tunggu(2); 
+
+            cin.clear(); 
+            cin.ignore(1000, '\n'); 
+            Percobaan = 0; 
         }
 
         Utils::bersihkanLayar();
@@ -98,38 +143,52 @@ User LoginAkun() {
         }
 
         cout << "Username (Ketik '0' untuk kembali): ";
-        cin >> InputUser;
+        getline(cin, InputUser); 
 
-        // Batal saat input username
-        if (InputUser == "0") {
-            return UserData; // Kembali ke menu awal dengan membawa UserData kosong
+        if (InputUser.empty()) {
+            cout << "\n[!] Username dan password tidak boleh kosong!\n";
+            Percobaan++;
+            Tunggu(1);
+            continue;
         }
+        if (InputUser == "0") return UserData; 
 
         cout << "Password (Ketik '0' untuk kembali): ";
-        cin >> InputPass;
+        getline(cin, InputPass);
 
-        // Batal saat input password
-        if (InputPass == "0") {
-            return UserData; 
+        if (InputPass.empty()) {
+            cout << "\n[!] Username dan password tidak boleh kosong!\n";
+            Percobaan++;
+            Tunggu(1);
+            continue;
         }
+        if (InputPass == "0") return UserData; 
 
         if (InputPass.length() < 5) {
             cout << "\n[!] Format salah. Password minimal 5 karakter!\n";
-            Percobaan++; // Tetap dihitung sebagai percobaan gagal
+            Percobaan++; 
             Tunggu(1);
-            continue; // Langsung ulang dari awal loop (minta username lagi)
+            continue; 
         }
 
-        ifstream File("data/users.txt");
+        ifstream File("data/users.csv");
         if (!File.is_open()) {
-            cout << "\n[!] Username tidak ditemukan!\n";
+            cout << "\n[!] Database tidak ditemukan!\n";
             cout << "[!] Silakan Register akun terlebih dahulu.\n";
             Tunggu(2);
-            return UserData; // Kembali ke menu utama
+            return UserData; 
         }
 
         bool loginBerhasil = false;
-        while (File >> UserData.Username >> UserData.Password >> UserData.Role) {
+        string barisData;
+        
+        // Membaca dan memotong data CSV untuk dicek
+        while (getline(File, barisData)) {
+            stringstream ss(barisData);
+            getline(ss, UserData.Username, ',');
+            getline(ss, UserData.Password, ',');
+            getline(ss, UserData.Role, ',');
+
             if (UserData.Username == InputUser && UserData.Password == InputPass) {
                 loginBerhasil = true;
                 break;
@@ -140,17 +199,16 @@ User LoginAkun() {
         if (loginBerhasil) {
             cout << "\n[OK] Berhasil masuk! Mohon tunggu...";
             Tunggu(1);
-            return UserData; // Mengembalikan data user yang berhasil login
+            return UserData; 
         } else {
-            Percobaan++; // Tambah jumlah gagal
+            Percobaan++; 
             if (Percobaan < MaksPercobaan) {
                 cout << "\nKredensial salah. Mengulang...";
                 Tunggu(1);
             }
         }
-    }
-}
-
+    } 
+} 
 
 User MulaiAuth() {
     int Pilihan;
@@ -164,18 +222,19 @@ User MulaiAuth() {
         cout << "3. Keluar\n";
         cout << "Pilih [1-3]: ";
         
-        // Validasi jika input bukan angka
         if (!(cin >> Pilihan)) {
             cin.clear();
             cin.ignore(1000, '\n');
             continue;
         }
+        
+        cin.ignore(1000, '\n'); 
 
         switch (Pilihan) {
             case 1:
                 UserAktif = LoginAkun();
                 if (UserAktif.Username != "") {
-                    return UserAktif; // Keluar dari loop jika login sukses
+                    return UserAktif; 
                 }
                 break;
             case 2:
