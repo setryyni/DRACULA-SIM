@@ -44,6 +44,100 @@ void TampilSemuaPendonor(NodePendonor* Head) {
     }
 }
 
+// Tampil semua akun ADMIN dari Users.txt
+void TampilAkunAdmin(NodePendonor* Head) {
+    cout << left
+         << setw(4)  << "No"
+         << setw(15) << "Username"
+         << setw(20) << "Password"
+         << setw(8)  << "Role"
+         << "\n";
+    cout << string(47, '-') << "\n";
+
+    ifstream File("data/Users.txt");
+    if (!File.is_open()) return;
+
+    string U, P, R;
+    int No = 1;
+    while (File >> U >> P >> R) {
+        if (R == "admin") {
+            cout << left
+                 << setw(4)  << No++
+                 << setw(15) << U
+                 << setw(20) << P
+                 << setw(8)  << R
+                 << "\n";
+        }
+    }
+    File.close();
+}
+
+// Tampil semua akun USER dari Users.txt + data diri dari linked list
+void TampilAkunUser(NodePendonor* Head) {
+    cout << left
+         << setw(4)  << "No"
+         << setw(15) << "Username"
+         << setw(20) << "Nama"
+         << setw(5)  << "Gol"
+         << setw(5)  << "Rhs"
+         << setw(13) << "No. Telp"
+         << "\n";
+    cout << string(62, '-') << "\n";
+
+    ifstream File("data/Users.txt");
+    if (!File.is_open()) return;
+
+    string U, P, R;
+    int No = 1;
+    while (File >> U >> P >> R) {
+        if (R == "user" || R == "pendonor") {
+            NodePendonor* Node = CariPendonorByUsername(Head, U);
+            cout << left
+                 << setw(4)  << No++
+                 << setw(15) << U
+                 << setw(20) << (Node ? Node->Data.Nama      : "-")
+                 << setw(5)  << (Node ? Node->Data.GolDarah  : "-")
+                 << setw(5)  << (Node ? Node->Data.Rhesus    : "-")
+                 << setw(13) << (Node ? Node->Data.NomorTelepon : "-")
+                 << "\n";
+        }
+    }
+    File.close();
+}
+
+// Tampil semua akun dari Users.txt termasuk admin
+void TampilSemuaAkun(NodePendonor* Head) {
+    cout << left
+         << setw(4)  << "No"
+         << setw(15) << "Username"
+         << setw(20) << "Nama"
+         << setw(8)  << "Role"
+         << setw(5)  << "Gol"
+         << setw(5)  << "Rhs"
+         << setw(13) << "No. Telp"
+         << "\n";
+    cout << string(70, '-') << "\n";
+
+    ifstream File("data/Users.txt");
+    if (!File.is_open()) return;
+
+    string U, P, R;
+    int No = 1;
+    while (File >> U >> P >> R) {
+        NodePendonor* Node = CariPendonorByUsername(Head, U);
+        cout << left
+             << setw(4)  << No++
+             << setw(15) << U
+             << setw(20) << (Node ? Node->Data.Nama : "-")
+             << setw(8)  << R
+             << setw(5)  << (Node ? Node->Data.GolDarah : "-")
+             << setw(5)  << (Node ? Node->Data.Rhesus : "-")
+             << setw(13) << (Node ? Node->Data.NomorTelepon : "-")
+             << "\n";
+    }
+    File.close();
+}
+
 // =============================================
 // MENU UTAMA ADMIN
 // =============================================
@@ -173,10 +267,11 @@ void AdminTambahAkun(NodePendonor*& Head) {
                 cout << "[!] Nama tidak boleh kosong!\n";
             }
 
-            // Input Gol Darah: validasi A/B/AB/O
+            // Input Gol Darah: validasi A/B/AB/O (huruf kecil/besar sama aja)
             while (true) {
                 cout << "Gol. Darah (A/B/AB/O) : ";
                 getline(cin, P.GolDarah);
+                P.GolDarah = NormalisasiGolDarah(P.GolDarah);
                 if (ValidasiGolDarah(P.GolDarah)) break;
                 cout << "[!] Golongan darah tidak valid!\n";
             }
@@ -229,7 +324,7 @@ void AdminTambahAkun(NodePendonor*& Head) {
                 // Simpan ke Riwayat.txt sebagai data historis
                 ofstream FileRiwayat("data/Riwayat.txt", ios::app);
                 if (FileRiwayat.is_open()) {
-                    FileRiwayat << Username << "|" << TglTerakhir << "|PMI|1|Data historis sebelum daftar\n";
+                    FileRiwayat << Username << "|" << TglTerakhir << "|PMI|1|Sukses\n";
                     FileRiwayat.close();
                 }
             }
@@ -257,18 +352,21 @@ void AdminTambahAkun(NodePendonor*& Head) {
 // =============================================
 void AdminTampilkanAkun(NodePendonor*& Head) {
     Utils::bersihkanLayar();
-    cout << "=== TAMPILKAN SEMUA AKUN ===\n";
+    cout << "=== TAMPILKAN AKUN ===\n";
 
-    if (ListKosong(Head)) {
+    // Cek Users.txt kosong atau tidak
+    ifstream CekFile("data/Users.txt");
+    bool FileKosong = CekFile.peek() == ifstream::traits_type::eof();
+    CekFile.close();
+
+    if (FileKosong) {
         cout << "[!] Belum ada data.\n";
         return;
     }
 
     int Pilihan;
-    cout << "1. Tampil Semua Akun (User/Admin)\n";
-    cout << "2. Sort Nama A-Z   (Selection Sort)\n";
-    cout << "3. Sort Nama Z-A   (Insertion Sort)\n";
-    cout << "4. Sort by Gol. Darah (Bubble Sort)\n";
+    cout << "1. Tampilkan Akun Admin\n";
+    cout << "2. Tampilkan Akun User\n";
     cout << "0. Kembali\n";
     cout << "Input pilihan: ";
 
@@ -282,20 +380,80 @@ void AdminTampilkanAkun(NodePendonor*& Head) {
     if (Pilihan == 0) return;
 
     if (Pilihan == 1) {
+        // Tampil akun admin saja
         Utils::bersihkanLayar();
-        cout << "=== DAFTAR SEMUA AKUN ===\n";
-        TampilSemuaPendonor(Head);
-        cout << "\nTotal: " << HitungPendonor(Head) << " akun\n";
+        cout << "=== DAFTAR AKUN ADMIN ===\n";
+        TampilAkunAdmin(Head);
 
-        // Sub-menu searching
-        cout << "\n--- SEARCHING ---\n";
-        cout << "1. Cari by Username (Linear Search)\n";
+    } else if (Pilihan == 2) {
+        // Tampil akun user dulu
+        Utils::bersihkanLayar();
+        cout << "=== DAFTAR AKUN USER ===\n";
+        TampilAkunUser(Head);
+
+        // Sub-menu sorting + searching
+        cout << "\n1. Sort Nama A-Z   (Selection Sort)\n";
+        cout << "2. Sort Nama Z-A   (Insertion Sort)\n";
+        cout << "3. Sort by Gol. Darah (Bubble Sort)\n";
+        cout << "4. Linear Search by Username\n";
         cout << "0. Kembali\n";
         cout << "Input pilihan: ";
-        int PilSearch;
-        cin >> PilSearch;
 
-        if (PilSearch == 1) {
+        int PilSub;
+        if (!(cin >> PilSub)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "[!] Input tidak valid!\n";
+            return;
+        }
+
+        if (PilSub == 0) return;
+
+        if (PilSub >= 1 && PilSub <= 3) {
+            // Buat salinan untuk sorting
+            NodePendonor* SortHead = nullptr;
+            NodePendonor* Curr = Head;
+            while (Curr != nullptr) {
+                TambahPendonor(SortHead, Curr->Data);
+                Curr = Curr->Next;
+            }
+
+            string JudulSort;
+            if      (PilSub == 1) { SortByNamaAZ(SortHead); JudulSort = "A-Z (Selection Sort)"; }
+            else if (PilSub == 2) { SortByNamaZA(SortHead); JudulSort = "Z-A (Insertion Sort)"; }
+            else                  { SortByRole(SortHead);   JudulSort = "by Gol. Darah (Bubble Sort)"; }
+
+            Utils::bersihkanLayar();
+            cout << "=== DAFTAR AKUN USER TERURUT " << JudulSort << " ===\n";
+            TampilSemuaPendonor(SortHead);
+
+            // Langsung Binary Search setelah sorting
+            string Query;
+            cin.ignore();
+            cout << "\nInput Nama yang dicari (0=batal): ";
+            getline(cin, Query);
+
+            if (Query != "0") {
+                int Size = HitungPendonor(SortHead);
+                NodePendonor* Hasil = BinarySearchByNama(SortHead, Query, Size);
+                if (Hasil != nullptr) {
+                    cout << "\n=== Hasil Pencarian (Binary Search) ===\n";
+                    CetakHeaderTabel();
+                    CetakBarisPendonor(1, Hasil->Data);
+                } else {
+                    cout << "\n[!] Data tidak ditemukan.\n";
+                }
+            }
+
+            // Bersihkan salinan
+            while (SortHead != nullptr) {
+                NodePendonor* Del = SortHead;
+                SortHead = SortHead->Next;
+                delete Del;
+            }
+
+        } else if (PilSub == 4) {
+            // Linear Search by Username
             string Query;
             cin.ignore();
             cout << "Input Username yang dicari (0=batal): ";
@@ -304,71 +462,15 @@ void AdminTampilkanAkun(NodePendonor*& Head) {
 
             NodePendonor* Hasil = CariPendonorByUsername(Head, Query);
             if (Hasil != nullptr) {
-                cout << "\n=== Hasil Pencarian ===\n";
+                cout << "\n=== Hasil Pencarian (Linear Search) ===\n";
                 CetakHeaderTabel();
                 CetakBarisPendonor(1, Hasil->Data);
             } else {
                 cout << "\n[!] Data tidak ditemukan.\n";
             }
-        }
 
-    } else if (Pilihan >= 2 && Pilihan <= 4) {
-        // Buat salinan untuk sorting
-        NodePendonor* SortHead = nullptr;
-        NodePendonor* Curr = Head;
-        while (Curr != nullptr) {
-            TambahPendonor(SortHead, Curr->Data);
-            Curr = Curr->Next;
-        }
-
-        string JudulSort;
-        if      (Pilihan == 2) { SortByNamaAZ(SortHead); JudulSort = "A-Z (Selection Sort)"; }
-        else if (Pilihan == 3) { SortByNamaZA(SortHead); JudulSort = "Z-A (Insertion Sort)"; }
-        else                   { SortByRole(SortHead);   JudulSort = "by Gol. Darah (Bubble Sort)"; }
-
-        Utils::bersihkanLayar();
-        cout << "=== DAFTAR AKUN TERURUT " << JudulSort << " ===\n";
-        TampilSemuaPendonor(SortHead);
-
-        // Sub-menu searching (Binary Search karena data terurut)
-        cout << "\n--- SEARCHING (data terurut) ---\n";
-        cout << "1. Cari by Nama (Binary Search)\n";
-        cout << "0. Kembali\n";
-        cout << "Input pilihan: ";
-        int PilSearch;
-        cin >> PilSearch;
-
-        if (PilSearch == 1) {
-            string Query;
-            cin.ignore();
-            cout << "Input Nama yang dicari (0=batal): ";
-            getline(cin, Query);
-            if (Query == "0") {
-                // Bersihkan salinan sebelum return
-                while (SortHead != nullptr) {
-                    NodePendonor* Del = SortHead;
-                    SortHead = SortHead->Next;
-                    delete Del;
-                }
-                return;
-            }
-
-            int Size = HitungPendonor(SortHead);
-            NodePendonor* Hasil = BinarySearchByNama(SortHead, Query, Size);
-            if (Hasil != nullptr) {
-                cout << "\n=== Hasil Pencarian ===\n";
-                CetakHeaderTabel();
-                CetakBarisPendonor(1, Hasil->Data);
-            } else {
-                cout << "\n[!] Data tidak ditemukan.\n";
-            }
-        }
-
-        // Bersihkan salinan
-        while (SortHead != nullptr) {
-            NodePendonor* Del = SortHead;
-            SortHead = SortHead->Next;
-            delete Del;
+        } else {
+            cout << "\n[!] Pilihan tidak valid!\n";
         }
 
     } else {
@@ -564,6 +666,7 @@ void AdminUpdateStok(StokDarah& Stok) {
         // Input Gol. Darah + cancel
         cout << "Input Gol. Darah (A/B/AB/O): ";
         getline(cin, GolDarah);
+        GolDarah = NormalisasiGolDarah(GolDarah);
         if (GolDarah == "0") {
             cout << "[!] Dibatalkan.\n";
             return;
@@ -615,6 +718,7 @@ void AdminKurangiStok(StokDarah& Stok) {
     while (true) {
         cout << "Input Gol. Darah (A/B/AB/O): ";
         getline(cin, GolDarah);
+        GolDarah = NormalisasiGolDarah(GolDarah);
         if (GolDarah == "0") {
             cout << "[!] Dibatalkan.\n";
             return;

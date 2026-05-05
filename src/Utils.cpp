@@ -71,7 +71,7 @@ namespace Utils {
 
     bool cekKelayakanWaktu(string tanggalTerakhir) {
         int selisih = hitungSelisihHari(tanggalTerakhir);
-        const int MIN_HARI = 60; // Aturan PMI: jarak minimal donor adalah 60 hari
+        const int MIN_HARI = 90; // Aturan PMI: jarak minimal donor adalah 90 hari
 
         if (selisih >= MIN_HARI) {
             return true;

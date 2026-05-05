@@ -10,9 +10,9 @@ using namespace std;
 
 /**
  * File: main.cpp
- * Deskripsi: Titik masuk utama aplikasi Sistem Donor Darah PMI.
+//  * Deskripsi: Titik masuk utama aplikasi Sistem Donor Darah PMI.
  * Mengatur alur pemindahan antara login dan menu spesifik role.
- */
+//  */
 
 int main() {
     // 1. Inisialisasi Data Utama

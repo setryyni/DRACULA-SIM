@@ -76,6 +76,7 @@ int HitungSelisihHari(const std::string& TglTerakhir);
 // =============================================
 bool ValidasiTanggal(const std::string& Tanggal);
 bool ValidasiGolDarah(const std::string& GolDarah);
+std::string NormalisasiGolDarah(const std::string& GolDarah);
 bool CekUsernameAdaDiFile(const std::string& Username);
 
 #endif

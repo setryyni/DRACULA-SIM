@@ -1,0 +1,4 @@
+budi|3201234567890001|Budi Santoso|A|+|Jl. Merdeka No. 1 Samarinda|081234567890
+siti|3201234567890002|Siti Rahmawati|B|-|Jl. Sudirman No. 5 Samarinda|082345678901
+andi|3201234567890003|Andi Pratama|O|+|Jl. Diponegoro No. 3 Samarinda|083456789012
+nina|3201234567890004|Nina Kusuma|AB|+|Jl. Ahmad Yani No. 7 Samarinda|084567890123

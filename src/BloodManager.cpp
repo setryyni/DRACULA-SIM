@@ -1,9 +1,11 @@
 #include "../include/BloodManager.h"
+#include "../include/Utils.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <ctime>
 #include <algorithm>
+#include <limits>
 
 using namespace std;
 
@@ -79,7 +81,7 @@ bool ListKosong(NodePendonor* Head) {
 // SORTING
 // =============================================
 
-// Selection Sort A-Z by Nama
+// Selection Sort A-Z by Nama (case-insensitive)
 void SortByNamaAZ(NodePendonor*& Head) {
     if (Head == nullptr || Head->Next == nullptr) return;
     NodePendonor* I = Head;
@@ -87,7 +89,11 @@ void SortByNamaAZ(NodePendonor*& Head) {
         NodePendonor* MinNode = I;
         NodePendonor* J = I->Next;
         while (J != nullptr) {
-            if (J->Data.Nama < MinNode->Data.Nama) MinNode = J;
+            string NamaJ   = J->Data.Nama;
+            string NamaMin = MinNode->Data.Nama;
+            for (char& c : NamaJ)   c = tolower(c);
+            for (char& c : NamaMin) c = tolower(c);
+            if (NamaJ < NamaMin) MinNode = J;
             J = J->Next;
         }
         if (MinNode != I) swap(I->Data, MinNode->Data);
@@ -95,22 +101,38 @@ void SortByNamaAZ(NodePendonor*& Head) {
     }
 }
 
-// Insertion Sort Z-A by Nama
+// Insertion Sort Z-A by Nama (case-insensitive)
 void SortByNamaZA(NodePendonor*& Head) {
     if (Head == nullptr || Head->Next == nullptr) return;
     NodePendonor* Sorted = nullptr;
     NodePendonor* Curr = Head;
     while (Curr != nullptr) {
         NodePendonor* Next = Curr->Next;
-        if (Sorted == nullptr || Curr->Data.Nama > Sorted->Data.Nama) {
+
+        string NamaCurr = Curr->Data.Nama;
+        for (char& c : NamaCurr) c = tolower(c);
+
+        if (Sorted == nullptr) {
             Curr->Next = Sorted;
             Sorted = Curr;
         } else {
-            NodePendonor* Temp = Sorted;
-            while (Temp->Next != nullptr && Temp->Next->Data.Nama >= Curr->Data.Nama)
-                Temp = Temp->Next;
-            Curr->Next = Temp->Next;
-            Temp->Next = Curr;
+            string NamaSorted = Sorted->Data.Nama;
+            for (char& c : NamaSorted) c = tolower(c);
+
+            if (NamaCurr > NamaSorted) {
+                Curr->Next = Sorted;
+                Sorted = Curr;
+            } else {
+                NodePendonor* Temp = Sorted;
+                while (Temp->Next != nullptr) {
+                    string NamaNext = Temp->Next->Data.Nama;
+                    for (char& c : NamaNext) c = tolower(c);
+                    if (NamaNext < NamaCurr) break;
+                    Temp = Temp->Next;
+                }
+                Curr->Next = Temp->Next;
+                Temp->Next = Curr;
+            }
         }
         Curr = Next;
     }
@@ -259,7 +281,17 @@ void SimpanStokKeFile(const StokDarah& Stok) {
 }
 
 bool ValidasiGolDarah(const string& GolDarah) {
-    return (GolDarah == "A" || GolDarah == "B" || GolDarah == "AB" || GolDarah == "O");
+    // Konversi ke uppercase dulu biar "a", "ab", "o" dll tetap valid
+    string Upper = GolDarah;
+    for (char& c : Upper) c = toupper(c);
+    return (Upper == "A" || Upper == "B" || Upper == "AB" || Upper == "O");
+}
+
+// Fungsi helper untuk konversi gol darah input ke uppercase
+string NormalisasiGolDarah(const string& GolDarah) {
+    string Upper = GolDarah;
+    for (char& c : Upper) c = toupper(c);
+    return Upper;
 }
 
 int GetStok(const StokDarah& Stok, const string& GolDarah) {
@@ -318,20 +350,19 @@ string AmbilTglTerakhir(const string& Username) {
     while (getline(File, Line)) {
         if (Line.empty()) continue;
         istringstream Iss(Line);
-        string U, Tgl, Lok, Jml, Ket;
+        string U, Tgl, Lok, Ket;
         getline(Iss, U,   '|');
         getline(Iss, Tgl, '|');
         getline(Iss, Lok, '|');
-        getline(Iss, Jml, '|');
+        Iss.ignore(numeric_limits<streamsize>::max(), '|'); // skip JumlahKantong
         getline(Iss, Ket);
-        // Hanya hitung donor yang berhasil (Sukses)
         if (U == Username && Ket == "Sukses") TglTerakhir = Tgl;
     }
     File.close();
     return TglTerakhir;
 }
 
-// Hitung total donor dari Riwayat.txt by Username
+// Hitung total donor dari Riwayat.txt by Username - hanya yang Sukses
 int HitungTotalDonor(const string& Username) {
     ifstream File("data/Riwayat.txt");
     if (!File.is_open()) return 0;
@@ -341,9 +372,13 @@ int HitungTotalDonor(const string& Username) {
     while (getline(File, Line)) {
         if (Line.empty()) continue;
         istringstream Iss(Line);
-        string U;
-        getline(Iss, U, '|');
-        if (U == Username) Total++;
+        string U, Tgl, Lok, Jml, Ket;
+        getline(Iss, U,   '|');
+        getline(Iss, Tgl, '|');
+        getline(Iss, Lok, '|');
+        getline(Iss, Jml, '|');
+        getline(Iss, Ket);
+        if (U == Username && Ket == "Sukses") Total++;
     }
     File.close();
     return Total;
@@ -380,21 +415,7 @@ bool ValidasiTanggal(const string& Tanggal) {
 }
 
 int HitungSelisihHari(const string& TglTerakhir) {
-    if (TglTerakhir.empty() || TglTerakhir == "-") return 9999;
-    int Tahun = stoi(TglTerakhir.substr(0, 4));
-    int Bulan = stoi(TglTerakhir.substr(5, 2));
-    int Hari  = stoi(TglTerakhir.substr(8, 2));
-
-    time_t Now = time(nullptr);
-    tm TmDonor  = {};
-    TmDonor.tm_year = Tahun - 1900;
-    TmDonor.tm_mon  = Bulan - 1;
-    TmDonor.tm_mday = Hari;
-    time_t TDonor = mktime(&TmDonor);
-
-    int Selisih = (int)(difftime(Now, TDonor) / 86400);
-    // Kalau negatif (tanggal masa depan), return 0 biar dianggap belum cukup
-    return Selisih < 0 ? 0 : Selisih;
+    return Utils::hitungSelisihHari(TglTerakhir);
 }
 
 bool CekUsernameAdaDiFile(const string& Username) {
