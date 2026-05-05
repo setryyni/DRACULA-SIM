@@ -18,7 +18,7 @@ void menuUser(const User& UserAktif) {
         cout << "      SISTEM DONOR DARAH\n";
         cout << "          MENU USER\n";
         cout << "================================\n";
-        cout << "1. Data Diri\n";
+        cout << "1. Profil\n";
         cout << "2. Cek Jadwal\n";
         cout << "3. Riwayat Donor\n";
         cout << "4. Informasi Edukasi\n";
@@ -28,7 +28,6 @@ void menuUser(const User& UserAktif) {
         
         // Validasi input menu
         if (!(cin >> pilihan)) {
-            cout << "[!] Input tidak valid. Masukkan angka 1-5.\n";
             cin.clear();
             cin.ignore(1000, '\n');
             continue;
@@ -36,7 +35,7 @@ void menuUser(const User& UserAktif) {
 
         switch (pilihan) {
             case 1:
-                dataDiri(UserAktif);
+                Profil(UserAktif);
                 break;
             case 2:
                 cekJadwal(UserAktif);
@@ -52,13 +51,14 @@ void menuUser(const User& UserAktif) {
                 lanjut = false;
                 return;
             default:
-                cout << "[!] Pilihan tidak ada. Silakan masukkan angka 1-5.\n";
+                cout << "[!] Pilihan tidak ada. Silakan masukkan angka 1-5." << endl;
+                Utils::tekanEnter();
                 break;
         }
     }
 }
 
-void dataDiri(const User& UserAktif) {
+void Profil(const User& UserAktif) {
     ifstream file("data/Pendonor.txt");
     Pendonor p;
     bool ditemukan = false;
@@ -284,7 +284,11 @@ void riwayatDonor(const User& UserAktif) {
 void edukasi() {
     int pilih;
     do {
-        cout << "\n=== EDUKASI DONOR DARAH ===\n";
+        Utils::bersihkanLayar();
+        cout << "\n================================\n";
+        cout << "         INFORMASI EDUKASI\n";
+        cout << "          DONOR DARAH\n";
+        cout << "================================\n";
         cout << "1. Syarat Donor Darah\n";
         cout << "2. Manfaat Donor Darah\n";
         cout << "3. Kondisi Tidak Boleh Donor\n";
@@ -293,7 +297,6 @@ void edukasi() {
         cout << "Pilih: ";
 
         if (!(cin >> pilih)) {
-            cout << "[!] Input tidak valid.\n";
             cin.clear();
             cin.ignore(1000, '\n');
             continue;
@@ -301,7 +304,9 @@ void edukasi() {
 
         switch(pilih) {
             case 1:
-                cout << "\n=== SYARAT DONOR DARAH ===\n";
+                cout << "\n================================\n";
+                cout << "         SYARAT DONOR DARAH\n";
+                cout << "================================\n";
                 cout << "- Usia 17 - 60 tahun\n";
                 cout << "- Berat badan minimal 45 kg\n";
                 cout << "- Tekanan darah normal (90/60 - 140/90)\n";
@@ -313,7 +318,9 @@ void edukasi() {
                 break;
 
             case 2:
-                cout << "\n=== MANFAAT DONOR DARAH ===\n";
+                cout << "\n================================\n";
+                cout << "       MANFAAT DONOR DARAH\n";
+                cout << "================================\n";
                 cout << "- Membantu menyelamatkan nyawa orang lain\n";
                 cout << "- Meningkatkan kesehatan jantung\n";
                 cout << "- Merangsang produksi sel darah baru\n";
@@ -323,7 +330,9 @@ void edukasi() {
                 break;
 
             case 3:
-                cout << "\n=== KONDISI TIDAK BOLEH DONOR ===\n";
+                cout << "\n================================\n";
+                cout << "   KONDISI TIDAK BOLEH DONOR\n";
+                cout << "================================\n";
                 cout << "- Sedang demam atau sakit\n";
                 cout << "- Tekanan darah tidak normal\n";
                 cout << "- Hb rendah\n";
@@ -334,7 +343,9 @@ void edukasi() {
                 break;
 
             case 4:
-                cout << "\n=== TIPS SEBELUM DONOR ===\n";
+                cout << "\n================================\n";
+                cout << "       TIPS SEBELUM DONOR\n";
+                cout << "================================\n";
                 cout << "- Tidur cukup minimal 6-8 jam\n";
                 cout << "- Makan makanan bergizi sebelum donor\n";
                 cout << "- Minum air putih yang cukup\n";
@@ -342,6 +353,9 @@ void edukasi() {
                 cout << "- Jangan donor saat perut kosong\n";
                 Utils::tekanEnter();
                 break;
+
+            case 0:
+                return;
 
             default:
                 cout << "\n[!] Pilihan tidak tersedia.\n";

@@ -6,7 +6,7 @@
 #include "BloodManager.h"
 
 void menuUser(const User& UserAktif);
-void dataDiri(const User& UserAktif);
+void Profil(const User& UserAktif);
 void cekJadwal(const User& UserAktif);
 void riwayatDonor(const User& UserAktif);
 void edukasi();
