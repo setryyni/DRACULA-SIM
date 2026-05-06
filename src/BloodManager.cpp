@@ -184,7 +184,6 @@ void MuatPendonorDariFile(NodePendonor*& Head) {
         if (Line.empty()) continue;
         istringstream Iss(Line);
         Pendonor P;
-        // Kalau salah satu field gagal dibaca, skip baris ini
         if (!getline(Iss, P.Username,     ',')) continue;
         if (!getline(Iss, P.Nik,          ',')) continue;
         if (!getline(Iss, P.Nama,         ',')) continue;
@@ -192,7 +191,6 @@ void MuatPendonorDariFile(NodePendonor*& Head) {
         if (!getline(Iss, P.Rhesus,       ',')) continue;
         if (!getline(Iss, P.Alamat,       ',')) continue;
         if (!getline(Iss, P.NomorTelepon))      continue;
-        // Semua field valid, baru tambah ke linked list
         TambahPendonor(Head, P);
     }
     File.close();

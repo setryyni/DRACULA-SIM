@@ -11,4 +11,4 @@ void cekJadwal(const User& UserAktif);
 void riwayatDonor(const User& UserAktif);
 void edukasi();
 
-#endif // USERPAGE_H
+#endif 

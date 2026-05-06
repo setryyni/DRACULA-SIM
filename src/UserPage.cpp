@@ -8,7 +8,6 @@
 #include <string>
 using namespace std;
 
-// MENU USER
 void menuUser(const User& UserAktif) {
     int pilihan;
     bool lanjut = true;
@@ -27,7 +26,6 @@ void menuUser(const User& UserAktif) {
         cout << "----------------------------------------\n";
         cout << " Pilih menu (1-5): ";
         
-        // Validasi input menu
         if (!(cin >> pilihan)) {
             cin.clear();
             cin.ignore(1000, '\n');
@@ -64,7 +62,6 @@ void Profil(const User& UserAktif) {
     Pendonor p;
     bool ditemukan = false;
 
-    // cek apakah sudah ada
     while (getline(file, p.Username, ',')) {
         getline(file, p.Nik, ',');
         getline(file, p.Nama, ',');
@@ -94,7 +91,6 @@ void Profil(const User& UserAktif) {
 
     file.close();
 
-    // kalau belum ada → input + simpan
     if (!ditemukan) {
         cout << "\n[!] Data belum ada, silakan isi.\n";
 
@@ -117,7 +113,6 @@ void Profil(const User& UserAktif) {
                 cout << "[!] Nama tidak boleh kosong!\n";
             }
 
-        // Input Gol Darah: validasi A/B/AB/O
         while (true) {
             cout << "Gol. Darah (A/B/AB/O) : ";
             getline(cin, p.GolDarah);
@@ -125,7 +120,6 @@ void Profil(const User& UserAktif) {
             cout << "[!] Golongan darah tidak valid!\n";
         }
 
-        // Input Rhesus: harus + atau -
         while (true) {
             cout << "Rhesus (+/-) : ";
             getline(cin, p.Rhesus);
@@ -133,7 +127,6 @@ void Profil(const User& UserAktif) {
             cout << "[!] Rhesus harus '+' atau '-'!\n";
         }
 
-        // Input Alamat: tidak boleh kosong
         while (true) {
             cout << "Alamat : ";
             getline(cin, p.Alamat);
@@ -141,7 +134,6 @@ void Profil(const User& UserAktif) {
             cout << "[!] Alamat tidak boleh kosong!\n";
         }
 
-        // Input Nomor Telepon: tidak boleh kosong
         while (true) {
             cout << "Nomor Telepon : ";
             getline(cin, p.NomorTelepon);
@@ -149,7 +141,6 @@ void Profil(const User& UserAktif) {
             cout << "[!] Nomor telepon tidak boleh kosong!\n";
         }
 
-        //   CEK RIWAYAT DONOR
         char pernahDonor;
         while (true) {
             cout << "\nPernah donor sebelumnya? (y/n): ";
@@ -172,7 +163,7 @@ void Profil(const User& UserAktif) {
                 if (ValidasiTanggal(tanggal)) break;
                 cout << "[!] Format tanggal salah!\n";
             }
-            // input lokasi
+
             while (true) {
                 cout << "Lokasi donor: ";
                 getline(cin, lokasi);
@@ -181,7 +172,6 @@ void Profil(const User& UserAktif) {
                 cout << "[!] Lokasi tidak boleh kosong!\n";
             }
 
-            //simpan ke Riwayat.csv
             ofstream fileRiwayat("data/Riwayat.csv", ios::app);
             if (fileRiwayat.is_open()) {
                 fileRiwayat << p.Username << ","
@@ -193,7 +183,6 @@ void Profil(const User& UserAktif) {
             }
         }
 
-        //simpan ke Pendonor.txt
         ofstream out("data/Pendonor.csv", ios::app);
         out << p.Username << ","
             << p.Nik << ","
@@ -228,7 +217,7 @@ void cekJadwal(const User& UserAktif) {
     }
 
     int selisih = HitungSelisihHari(tglTerakhir);
-    int batas = 60;
+    int batas = 90;
     int sisa = batas - selisih;
 
     // Informasi utama

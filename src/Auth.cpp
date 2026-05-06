@@ -4,15 +4,14 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <sstream> // WAJIB DITAMBAHKAN untuk membaca file CSV
+#include <sstream> 
 #include <cstdlib>
 #include <windows.h> 
 
 using namespace std;
 
-// Fungsi pembantu untuk memberi jeda waktu
 void Tunggu(int Detik) {
-    Sleep(Detik * 1000); // Milidetik
+    Sleep(Detik * 1000); 
 }
 
 bool RegisterAkun() {
@@ -21,7 +20,6 @@ bool RegisterAkun() {
     Utils::bersihkanLayar();
     cout << "=== PENDAFTARAN PENDONOR ===\n";
     
-    // --- LOOP INPUT USERNAME ---
     while (true) {
         cout << "Masukkan Username (Ketik '0' untuk batal): ";
         getline(cin, UsernameBaru); 
@@ -38,8 +36,7 @@ bool RegisterAkun() {
     }
 
     if (UsernameBaru == "0") return false; 
-    
-    // Cek apakah username sudah ada di database CSV
+
     ifstream FileIn("data/users.csv");
     if (FileIn.is_open()) {
         string barisData;
@@ -61,7 +58,6 @@ bool RegisterAkun() {
         FileIn.close();
     }
 
-    // --- LOOP INPUT PASSWORD ---
     while (true) {
         cout << "Masukkan Password (Ketik '0' untuk batal, min. 5 karakter): ";
         getline(cin, PasswordBaru);
@@ -82,7 +78,6 @@ bool RegisterAkun() {
         break; 
     }
 
-    // Simpan ke database CSV (pisahkan dengan KOMA)
     ofstream FileOut("data/users.csv", ios::app);
     if (FileOut.is_open()) {
         FileOut << UsernameBaru << "," << PasswordBaru << ",pendonor\n";
@@ -102,7 +97,6 @@ User LoginAkun() {
     User UserData = {"", "", ""};
 
     while (true) {
-        // Cek jika percobaan sudah mencapai 3 kali gagal
         if (Percobaan >= MaksPercobaan) {
             Utils::bersihkanLayar();
             cout << "==========================================\n";
@@ -182,7 +176,6 @@ User LoginAkun() {
         bool loginBerhasil = false;
         string barisData;
         
-        // Membaca dan memotong data CSV untuk dicek
         while (getline(File, barisData)) {
             stringstream ss(barisData);
             getline(ss, UserData.Username, ',');

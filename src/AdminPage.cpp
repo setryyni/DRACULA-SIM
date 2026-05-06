@@ -530,7 +530,6 @@ void AdminEditDataDiri(NodePendonor*& Head) {
             P.Username = NilaBaru;
             SimpanPendonorKeFile(Head);
 
-            // Update Users.csv
             ifstream FileIn("data/Users.csv");
             ofstream FileTmp("data/Users_tmp.csv");
             string Line;
@@ -548,7 +547,6 @@ void AdminEditDataDiri(NodePendonor*& Head) {
             remove("data/Users.csv");
             rename("data/Users_tmp.csv", "data/Users.csv");
 
-            // Update Riwayat.csv
             ifstream FileRIn("data/Riwayat.csv");
             ofstream FileRTmp("data/Riwayat_tmp.csv");
             while (getline(FileRIn, Line)) {
@@ -775,7 +773,6 @@ void AdminHapusPendonor(NodePendonor*& Head) {
     HapusPendonor(Head, Username);
     SimpanPendonorKeFile(Head);
 
-    // Hapus dari Users.csv
     ifstream FileIn("data/Users.csv");
     ofstream FileTmp("data/Users_tmp.csv");
     string Line;
@@ -792,7 +789,6 @@ void AdminHapusPendonor(NodePendonor*& Head) {
     remove("data/Users.csv");
     rename("data/Users_tmp.csv", "data/Users.csv");
 
-    // Hapus dari Riwayat.csv
     ifstream FileRIn("data/Riwayat.csv");
     ofstream FileRTmp("data/Riwayat_tmp.csv");
     while (getline(FileRIn, Line)) {
