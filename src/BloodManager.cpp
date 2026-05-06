@@ -203,7 +203,7 @@ NodePendonor* BinarySearchByNama(NodePendonor* SortedHead, const string& Nama, i
 // =============================================
 
 void MuatPendonorDariFile(NodePendonor*& Head) {
-    ifstream File("data/Pendonor.txt");
+    ifstream File("data/Pendonor.csv");
     if (!File.is_open()) return;
 
     string Line;
@@ -212,12 +212,12 @@ void MuatPendonorDariFile(NodePendonor*& Head) {
         istringstream Iss(Line);
         Pendonor P;
         // Kalau salah satu field gagal dibaca, skip baris ini
-        if (!getline(Iss, P.Username,     '|')) continue;
-        if (!getline(Iss, P.Nik,          '|')) continue;
-        if (!getline(Iss, P.Nama,         '|')) continue;
-        if (!getline(Iss, P.GolDarah,     '|')) continue;
-        if (!getline(Iss, P.Rhesus,       '|')) continue;
-        if (!getline(Iss, P.Alamat,       '|')) continue;
+        if (!getline(Iss, P.Username,     ',')) continue;
+        if (!getline(Iss, P.Nik,          ',')) continue;
+        if (!getline(Iss, P.Nama,         ',')) continue;
+        if (!getline(Iss, P.GolDarah,     ',')) continue;
+        if (!getline(Iss, P.Rhesus,       ',')) continue;
+        if (!getline(Iss, P.Alamat,       ',')) continue;
         if (!getline(Iss, P.NomorTelepon))      continue;
         // Semua field valid, baru tambah ke linked list
         TambahPendonor(Head, P);
@@ -226,17 +226,17 @@ void MuatPendonorDariFile(NodePendonor*& Head) {
 }
 
 void SimpanPendonorKeFile(NodePendonor* Head) {
-    ofstream File("data/Pendonor.txt");
+    ofstream File("data/Pendonor.csv");
     if (!File.is_open()) return;
     NodePendonor* Curr = Head;
     while (Curr != nullptr) {
         Pendonor& P = Curr->Data;
-        File << P.Username     << "|"
-             << P.Nik          << "|"
-             << P.Nama         << "|"
-             << P.GolDarah     << "|"
-             << P.Rhesus       << "|"
-             << P.Alamat       << "|"
+        File << P.Username     << ","
+             << P.Nik          << ","
+             << P.Nama         << ","
+             << P.GolDarah     << ","
+             << P.Rhesus       << ","
+             << P.Alamat       << ","
              << P.NomorTelepon << "\n";
         Curr = Curr->Next;
     }
@@ -250,16 +250,16 @@ void SimpanPendonorKeFile(NodePendonor* Head) {
 
 StokDarah MuatStokDariFile() {
     StokDarah Stok = {0, 0, 0, 0};
-    ifstream File("data/StokDarah.txt");
+    ifstream File("data/StokDarah.csv");
     if (!File.is_open()) return Stok;
     string Line;
     if (getline(File, Line) && !Line.empty()) {
         try {
             istringstream Iss(Line);
             string Val;
-            getline(Iss, Val, '|'); Stok.StokA  = Val.empty() ? 0 : stoi(Val);
-            getline(Iss, Val, '|'); Stok.StokB  = Val.empty() ? 0 : stoi(Val);
-            getline(Iss, Val, '|'); Stok.StokAB = Val.empty() ? 0 : stoi(Val);
+            getline(Iss, Val, ','); Stok.StokA  = Val.empty() ? 0 : stoi(Val);
+            getline(Iss, Val, ','); Stok.StokB  = Val.empty() ? 0 : stoi(Val);
+            getline(Iss, Val, ','); Stok.StokAB = Val.empty() ? 0 : stoi(Val);
             getline(Iss, Val);      Stok.StokO  = Val.empty() ? 0 : stoi(Val);
         } catch (...) {
             // Kalau format file rusak, return stok 0 semua
@@ -271,11 +271,11 @@ StokDarah MuatStokDariFile() {
 }
 
 void SimpanStokKeFile(const StokDarah& Stok) {
-    ofstream File("data/StokDarah.txt");
+    ofstream File("data/StokDarah.csv");
     if (!File.is_open()) return;
-    File << Stok.StokA  << "|"
-         << Stok.StokB  << "|"
-         << Stok.StokAB << "|"
+    File << Stok.StokA  << ","
+         << Stok.StokB  << ","
+         << Stok.StokAB << ","
          << Stok.StokO  << "\n";
     File.close();
 }
@@ -331,19 +331,19 @@ bool StokKosong(const StokDarah& Stok) {
 // =============================================
 
 void TambahRiwayat(const RiwayatDonor& Riwayat) {
-    ofstream File("data/Riwayat.txt", ios::app);
+    ofstream File("data/Riwayat.csv", ios::app);
     if (!File.is_open()) return;
-    File << Riwayat.username      << "|"
-         << Riwayat.TanggalDonor  << "|"
-         << Riwayat.Lokasi        << "|"
-         << Riwayat.JumlahKantong << "|"
+    File << Riwayat.username      << ","
+         << Riwayat.TanggalDonor  << ","
+         << Riwayat.Lokasi        << ","
+         << Riwayat.JumlahKantong << ","
          << Riwayat.Keterangan    << "\n";
     File.close();
 }
 
 // Ambil tanggal donor terakhir yang SUKSES dari Riwayat.txt by Username
 string AmbilTglTerakhir(const string& Username) {
-    ifstream File("data/Riwayat.txt");
+    ifstream File("data/Riwayat.csv");
     if (!File.is_open()) return "-";
 
     string Line, TglTerakhir = "-";
@@ -351,10 +351,10 @@ string AmbilTglTerakhir(const string& Username) {
         if (Line.empty()) continue;
         istringstream Iss(Line);
         string U, Tgl, Lok, Ket;
-        getline(Iss, U,   '|');
-        getline(Iss, Tgl, '|');
-        getline(Iss, Lok, '|');
-        Iss.ignore(numeric_limits<streamsize>::max(), '|'); // skip JumlahKantong
+        getline(Iss, U,   ',');
+        getline(Iss, Tgl, ',');
+        getline(Iss, Lok, ',');
+        Iss.ignore(numeric_limits<streamsize>::max(), ','); // skip JumlahKantong
         getline(Iss, Ket);
         if (U == Username && Ket == "Sukses") TglTerakhir = Tgl;
     }
@@ -364,7 +364,7 @@ string AmbilTglTerakhir(const string& Username) {
 
 // Hitung total donor dari Riwayat.txt by Username - hanya yang Sukses
 int HitungTotalDonor(const string& Username) {
-    ifstream File("data/Riwayat.txt");
+    ifstream File("data/Riwayat.csv");
     if (!File.is_open()) return 0;
 
     int Total = 0;
@@ -373,10 +373,10 @@ int HitungTotalDonor(const string& Username) {
         if (Line.empty()) continue;
         istringstream Iss(Line);
         string U, Tgl, Lok, Jml, Ket;
-        getline(Iss, U,   '|');
-        getline(Iss, Tgl, '|');
-        getline(Iss, Lok, '|');
-        getline(Iss, Jml, '|');
+        getline(Iss, U,   ',');
+        getline(Iss, Tgl, ',');
+        getline(Iss, Lok, ',');
+        getline(Iss, Jml, ',');
         getline(Iss, Ket);
         if (U == Username && Ket == "Sukses") Total++;
     }
@@ -419,10 +419,16 @@ int HitungSelisihHari(const string& TglTerakhir) {
 }
 
 bool CekUsernameAdaDiFile(const string& Username) {
-    ifstream File("data/Users.txt");
+    ifstream File("data/Users.csv");
     if (!File.is_open()) return false;
-    string U, P, R;
-    while (File >> U >> P >> R) {
+    string Line;
+    while (getline(File, Line)) {
+        if (Line.empty()) continue;
+        istringstream Iss(Line);
+        string U, P, R;
+        getline(Iss, U, ',');
+        getline(Iss, P, ',');
+        getline(Iss, R);
         if (U == Username) {
             File.close();
             return true;
