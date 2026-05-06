@@ -34,7 +34,7 @@ int main() {
             // Jika role adalah admin, masuk ke menu admin
             MenuAdmin(userAktif, headPendonor, stokDarah);
         } 
-        else if (userAktif.Role == "pendonor") {
+        else if (userAktif.Role == "user") {
             // Jika role adalah pendonor, masuk ke menu user
             menuUser(userAktif);
         }
