@@ -8,9 +8,6 @@
 
 using namespace std;
 
-// =============================================
-// HELPER
-// =============================================
 void CetakHeaderTabel() {
     cout << left
          << setw(4)  << "No"
@@ -106,7 +103,6 @@ void TampilAkunUser(NodePendonor* Head) {
         if (R == "user" || R == "pendonor") {
             NodePendonor* Node = CariPendonorByUsername(Head, U);
 
-            // Potong alamat kalau terlalu panjang
             string Alamat = Node ? Node->Data.Alamat : "-";
             if (Alamat.length() > 33) Alamat = Alamat.substr(0, 30) + "...";
 
@@ -164,9 +160,6 @@ void TampilSemuaAkun(NodePendonor* Head) {
     File.close();
 }
 
-// =============================================
-// MENU UTAMA ADMIN
-// =============================================
 void MenuAdmin(const User& UserAktif, NodePendonor*& Head, StokDarah& Stok) {
     int Pilihan;
     while (true) {
@@ -214,9 +207,6 @@ void MenuAdmin(const User& UserAktif, NodePendonor*& Head, StokDarah& Stok) {
     }
 }
 
-// =============================================
-// 1. TAMBAH AKUN
-// =============================================
 void AdminTambahAkun(NodePendonor*& Head) {
     bool TambahLagi = true;
 
@@ -355,9 +345,6 @@ void AdminTambahAkun(NodePendonor*& Head) {
     }
 }
 
-// =============================================
-// 2. TAMPILKAN AKUN
-// =============================================
 void AdminTampilkanAkun(NodePendonor*& Head) {
     Utils::bersihkanLayar();
     cout << "=== TAMPILKAN SEMUA AKUN ===\n";
@@ -476,9 +463,6 @@ void AdminTampilkanAkun(NodePendonor*& Head) {
     }
 }
 
-// =============================================
-// 3. EDIT DATA DIRI PENDONOR
-// =============================================
 void AdminEditDataDiri(NodePendonor*& Head) {
     Utils::bersihkanLayar();
     cout << "=== EDIT DATA DIRI PENDONOR ===\n";
@@ -698,9 +682,6 @@ void AdminEditDataDiri(NodePendonor*& Head) {
     }
 }
 
-// =============================================
-// 4. UPDATE RIWAYAT PENDONOR
-// =============================================
 void AdminUpdateRiwayat(NodePendonor*& Head) {
     Utils::bersihkanLayar();
     cout << "=== UPDATE RIWAYAT PENDONOR ===\n";
@@ -759,9 +740,6 @@ void AdminUpdateRiwayat(NodePendonor*& Head) {
     cout << "\n[OK] Riwayat berhasil diperbarui!\n";
 }
 
-// =============================================
-// 5. HAPUS PENDONOR
-// =============================================
 void AdminHapusPendonor(NodePendonor*& Head) {
     Utils::bersihkanLayar();
     cout << "=== HAPUS PENDONOR ===\n";
@@ -831,9 +809,6 @@ void AdminHapusPendonor(NodePendonor*& Head) {
     cout << "\n[OK] Data berhasil dihapus!\n";
 }
 
-// =============================================
-// 6. CEK STOK DARAH
-// =============================================
 void AdminCekStok(const StokDarah& Stok) {
     Utils::bersihkanLayar();
     cout << "=== CEK STOK DARAH ===\n";
@@ -853,9 +828,6 @@ void AdminCekStok(const StokDarah& Stok) {
     cout << left << setw(12) << "Total" << (Stok.StokA + Stok.StokB + Stok.StokAB + Stok.StokO) << "\n";
 }
 
-// =============================================
-// 7. UPDATE STOK DARAH
-// =============================================
 void AdminUpdateStok(StokDarah& Stok) {
     Utils::bersihkanLayar();
     cout << "=== UPDATE STOK DARAH ===\n";
@@ -892,9 +864,6 @@ void AdminUpdateStok(StokDarah& Stok) {
     cout << "Stok " << GolDarah << " sekarang: " << GetStok(Stok, GolDarah) << " kantong\n";
 }
 
-// =============================================
-// 8. KURANGI STOK DARAH
-// =============================================
 void AdminKurangiStok(StokDarah& Stok) {
     Utils::bersihkanLayar();
     cout << "=== KURANGI STOK DARAH ===\n";
@@ -937,9 +906,6 @@ void AdminKurangiStok(StokDarah& Stok) {
     cout << "Stok " << GolDarah << " sekarang: " << GetStok(Stok, GolDarah) << " kantong\n";
 }
 
-// =============================================
-// 9. VERIFIKASI DATA
-// =============================================
 void AdminVerifikasiDonor(NodePendonor*& Head) {
     Utils::bersihkanLayar();
     cout << "=== VERIFIKASI DATA ===\n";

@@ -4,47 +4,21 @@
 #include "Models.h"
 #include "BloodManager.h"
 
-/**
- * File: AdminPage.h
- * Deskripsi: Deklarasi fungsi menu admin PMI.
- */
-
-// Helper functions
 void CetakHeaderTabel();
 void CetakBarisPendonor(int No, const Pendonor& P);
 void TampilSemuaPendonor(NodePendonor* Head);
 void TampilSemuaAkun(NodePendonor* Head);
 void TampilAkunAdmin(NodePendonor* Head);
 void TampilAkunUser(NodePendonor* Head);
-
-// Menu utama admin (loop sampai logout)
 void MenuAdmin(const User& UserAktif, NodePendonor*& Head, StokDarah& Stok);
-
-// 1. Tambah akun
 void AdminTambahAkun(NodePendonor*& Head);
-
-// 2. Tampilkan semua akun + sorting + searching
 void AdminTampilkanAkun(NodePendonor*& Head);
-
-// 3. Edit data diri pendonor
 void AdminEditDataDiri(NodePendonor*& Head);
-
-// 4. Update riwayat donor terakhir
 void AdminUpdateRiwayat(NodePendonor*& Head);
-
-// 5. Hapus pendonor
 void AdminHapusPendonor(NodePendonor*& Head);
-
-// 6. Cek stok darah
 void AdminCekStok(const StokDarah& Stok);
-
-// 7. Update (tambah) stok darah
 void AdminUpdateStok(StokDarah& Stok);
-
-// 8. Kurangi stok darah
 void AdminKurangiStok(StokDarah& Stok);
-
-// 9. Verifikasi kelayakan donor
 void AdminVerifikasiDonor(NodePendonor*& Head);
 
 #endif

@@ -9,10 +9,6 @@
 
 using namespace std;
 
-// =============================================
-// LINKED LIST
-// =============================================
-
 void InitList(NodePendonor*& Head) {
     Head = nullptr;
 }
@@ -64,8 +60,6 @@ NodePendonor* CariPendonorByUsername(NodePendonor* Head, const string& Username)
     return nullptr;
 }
 
-
-
 int HitungPendonor(NodePendonor* Head) {
     int Count = 0;
     NodePendonor* Curr = Head;
@@ -77,11 +71,6 @@ bool ListKosong(NodePendonor* Head) {
     return Head == nullptr;
 }
 
-// =============================================
-// SORTING
-// =============================================
-
-// Selection Sort A-Z by Nama (case-insensitive)
 void SortByNamaAZ(NodePendonor*& Head) {
     if (Head == nullptr || Head->Next == nullptr) return;
     NodePendonor* I = Head;
@@ -101,7 +90,6 @@ void SortByNamaAZ(NodePendonor*& Head) {
     }
 }
 
-// Insertion Sort Z-A by Nama (case-insensitive)
 void SortByNamaZA(NodePendonor*& Head) {
     if (Head == nullptr || Head->Next == nullptr) return;
     NodePendonor* Sorted = nullptr;
@@ -139,7 +127,6 @@ void SortByNamaZA(NodePendonor*& Head) {
     Head = Sorted;
 }
 
-// Bubble Sort by GolDarah
 void SortByRole(NodePendonor*& Head) {
     if (Head == nullptr || Head->Next == nullptr) return;
     bool Swapped;
@@ -156,15 +143,8 @@ void SortByRole(NodePendonor*& Head) {
     } while (Swapped);
 }
 
-// =============================================
-// SEARCHING
-// =============================================
-
-// Binary Search by Nama (data harus terurut A-Z, case-insensitive)
 NodePendonor* BinarySearchByNama(NodePendonor* SortedHead, const string& Nama, int Size) {
     if (SortedHead == nullptr || Size == 0) return nullptr;
-
-    // Konversi query ke lowercase buat perbandingan
     string NamaLower = Nama;
     for (char& c : NamaLower) c = tolower(c);
 
@@ -179,8 +159,6 @@ NodePendonor* BinarySearchByNama(NodePendonor* SortedHead, const string& Nama, i
     NodePendonor* Hasil = nullptr;
     while (Lo <= Hi) {
         int Mid = (Lo + Hi) / 2;
-
-        // Konversi nama di array ke lowercase juga
         string NamaMid = Arr[Mid]->Data.Nama;
         for (char& c : NamaMid) c = tolower(c);
 
@@ -196,11 +174,6 @@ NodePendonor* BinarySearchByNama(NodePendonor* SortedHead, const string& Nama, i
     delete[] Arr;
     return Hasil;
 }
-
-// =============================================
-// FILE I/O PENDONOR
-// Format: Username|Nik|Nama|GolDarah|Rhesus|Alamat|NomorTelepon
-// =============================================
 
 void MuatPendonorDariFile(NodePendonor*& Head) {
     ifstream File("data/Pendonor.csv");
@@ -243,11 +216,6 @@ void SimpanPendonorKeFile(NodePendonor* Head) {
     File.close();
 }
 
-// =============================================
-// STOK DARAH
-// Format: A|B|AB|O
-// =============================================
-
 StokDarah MuatStokDariFile() {
     StokDarah Stok = {0, 0, 0, 0};
     ifstream File("data/StokDarah.csv");
@@ -262,7 +230,6 @@ StokDarah MuatStokDariFile() {
             getline(Iss, Val, ','); Stok.StokAB = Val.empty() ? 0 : stoi(Val);
             getline(Iss, Val);      Stok.StokO  = Val.empty() ? 0 : stoi(Val);
         } catch (...) {
-            // Kalau format file rusak, return stok 0 semua
             Stok = {0, 0, 0, 0};
         }
     }
@@ -281,13 +248,11 @@ void SimpanStokKeFile(const StokDarah& Stok) {
 }
 
 bool ValidasiGolDarah(const string& GolDarah) {
-    // Konversi ke uppercase dulu biar "a", "ab", "o" dll tetap valid
     string Upper = GolDarah;
     for (char& c : Upper) c = toupper(c);
     return (Upper == "A" || Upper == "B" || Upper == "AB" || Upper == "O");
 }
 
-// Fungsi helper untuk konversi gol darah input ke uppercase
 string NormalisasiGolDarah(const string& GolDarah) {
     string Upper = GolDarah;
     for (char& c : Upper) c = toupper(c);
@@ -325,11 +290,6 @@ bool StokKosong(const StokDarah& Stok) {
     return (Stok.StokA == 0 && Stok.StokB == 0 && Stok.StokAB == 0 && Stok.StokO == 0);
 }
 
-// =============================================
-// RIWAYAT DONOR
-// Format: Username|TanggalDonor|Lokasi|JumlahKantong|Keterangan
-// =============================================
-
 void TambahRiwayat(const RiwayatDonor& Riwayat) {
     ofstream File("data/Riwayat.csv", ios::app);
     if (!File.is_open()) return;
@@ -341,7 +301,6 @@ void TambahRiwayat(const RiwayatDonor& Riwayat) {
     File.close();
 }
 
-// Ambil tanggal donor terakhir yang SUKSES dari Riwayat.txt by Username
 string AmbilTglTerakhir(const string& Username) {
     ifstream File("data/Riwayat.csv");
     if (!File.is_open()) return "-";
@@ -354,39 +313,13 @@ string AmbilTglTerakhir(const string& Username) {
         getline(Iss, U,   ',');
         getline(Iss, Tgl, ',');
         getline(Iss, Lok, ',');
-        Iss.ignore(numeric_limits<streamsize>::max(), ','); // skip JumlahKantong
+        Iss.ignore(numeric_limits<streamsize>::max(), ','); 
         getline(Iss, Ket);
         if (U == Username && Ket == "Sukses") TglTerakhir = Tgl;
     }
     File.close();
     return TglTerakhir;
 }
-
-// Hitung total donor dari Riwayat.txt by Username - hanya yang Sukses
-int HitungTotalDonor(const string& Username) {
-    ifstream File("data/Riwayat.csv");
-    if (!File.is_open()) return 0;
-
-    int Total = 0;
-    string Line;
-    while (getline(File, Line)) {
-        if (Line.empty()) continue;
-        istringstream Iss(Line);
-        string U, Tgl, Lok, Jml, Ket;
-        getline(Iss, U,   ',');
-        getline(Iss, Tgl, ',');
-        getline(Iss, Lok, ',');
-        getline(Iss, Jml, ',');
-        getline(Iss, Ket);
-        if (U == Username && Ket == "Sukses") Total++;
-    }
-    File.close();
-    return Total;
-}
-
-// =============================================
-// VALIDASI
-// =============================================
 
 bool ValidasiTanggal(const string& Tanggal) {
     if (Tanggal.size() != 10) return false;
@@ -402,7 +335,6 @@ bool ValidasiTanggal(const string& Tanggal) {
     if (Hari  < 1 || Hari  > 31) return false;
     if (Tahun < 2000)             return false;
 
-    // Cek tidak boleh tanggal masa depan
     time_t Now = time(nullptr);
     tm TmInput = {};
     TmInput.tm_year = Tahun - 1900;
