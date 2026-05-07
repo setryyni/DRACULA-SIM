@@ -244,10 +244,21 @@ void AdminTambahAkun(NodePendonor*& Head) {
             cout << "[!] Role tidak valid! Masukkan 'user' atau 'admin'.\n";
         }
 
-        ofstream FileUser("data/Users.csv", ios::app);
-        if (FileUser.is_open()) {
-            FileUser << Username << "," << Password << "," << Role << "\n";
-            FileUser.close();
+        {
+            bool FileKosong = true;
+            ifstream CekAkhir("data/Users.csv");
+            if (CekAkhir.is_open()) {
+                CekAkhir.seekg(0, ios::end);
+                FileKosong = (CekAkhir.tellg() == 0);
+                CekAkhir.close();
+            }
+
+            ofstream FileUser("data/Users.csv", ios::app);
+            if (FileUser.is_open()) {
+                if (!FileKosong) FileUser << "\n";
+                FileUser << Username << "," << Password << "," << Role;
+                FileUser.close();
+            }
         }
 
         if (Role == "user") {
@@ -255,10 +266,35 @@ void AdminTambahAkun(NodePendonor*& Head) {
             P.Username = Username;
 
             cout << "\n--- Isi Data Diri Pendonor ---\n";
+            cout << "(ketik '0' di field manapun untuk batal, data tidak akan tersimpan)\n\n";
 
             while (true) {
                 cout << "NIK (16 digit) : ";
                 getline(cin, P.Nik);
+                if (P.Nik == "0") {
+                    ifstream FileIn("data/Users.csv");
+                    ofstream FileTmp("data/Users_tmp.csv");
+                    string Line;
+                    bool Pertama = true;
+                    while (getline(FileIn, Line)) {
+                        if (Line.empty()) continue;
+                        istringstream Iss(Line);
+                        string U, Pw, R;
+                        getline(Iss, U, ',');
+                        getline(Iss, Pw, ',');
+                        getline(Iss, R);
+                        if (U != Username) {
+                            if (!Pertama) FileTmp << "\n";
+                            FileTmp << U << "," << Pw << "," << R;
+                            Pertama = false;
+                        }
+                    }
+                    FileIn.close(); FileTmp.close();
+                    remove("data/Users.csv");
+                    rename("data/Users_tmp.csv", "data/Users.csv");
+                    cout << "[!] Dibatalkan. Akun tidak jadi ditambahkan.\n";
+                    return;
+                }
                 if (P.Nik.length() != 16) { cout << "[!] NIK harus 16 digit!\n"; continue; }
                 bool SemuaAngka = true;
                 for (char c : P.Nik) if (!isdigit(c)) { SemuaAngka = false; break; }
@@ -269,6 +305,26 @@ void AdminTambahAkun(NodePendonor*& Head) {
             while (true) {
                 cout << "Nama Lengkap   : ";
                 getline(cin, P.Nama);
+                if (P.Nama == "0") {
+                    ifstream FileIn("data/Users.csv");
+                    ofstream FileTmp("data/Users_tmp.csv");
+                    string Line; bool Pertama = true;
+                    while (getline(FileIn, Line)) {
+                        if (Line.empty()) continue;
+                        istringstream Iss(Line);
+                        string U, Pw, R;
+                        getline(Iss, U, ','); getline(Iss, Pw, ','); getline(Iss, R);
+                        if (U != Username) {
+                            if (!Pertama) FileTmp << "\n";
+                            FileTmp << U << "," << Pw << "," << R;
+                            Pertama = false;
+                        }
+                    }
+                    FileIn.close(); FileTmp.close();
+                    remove("data/Users.csv"); rename("data/Users_tmp.csv", "data/Users.csv");
+                    cout << "[!] Dibatalkan. Akun tidak jadi ditambahkan.\n";
+                    return;
+                }
                 if (!P.Nama.empty()) break;
                 cout << "[!] Nama tidak boleh kosong!\n";
             }
@@ -276,6 +332,26 @@ void AdminTambahAkun(NodePendonor*& Head) {
             while (true) {
                 cout << "Gol. Darah (A/B/AB/O) : ";
                 getline(cin, P.GolDarah);
+                if (P.GolDarah == "0") {
+                    ifstream FileIn("data/Users.csv");
+                    ofstream FileTmp("data/Users_tmp.csv");
+                    string Line; bool Pertama = true;
+                    while (getline(FileIn, Line)) {
+                        if (Line.empty()) continue;
+                        istringstream Iss(Line);
+                        string U, Pw, R;
+                        getline(Iss, U, ','); getline(Iss, Pw, ','); getline(Iss, R);
+                        if (U != Username) {
+                            if (!Pertama) FileTmp << "\n";
+                            FileTmp << U << "," << Pw << "," << R;
+                            Pertama = false;
+                        }
+                    }
+                    FileIn.close(); FileTmp.close();
+                    remove("data/Users.csv"); rename("data/Users_tmp.csv", "data/Users.csv");
+                    cout << "[!] Dibatalkan. Akun tidak jadi ditambahkan.\n";
+                    return;
+                }
                 P.GolDarah = NormalisasiGolDarah(P.GolDarah);
                 if (ValidasiGolDarah(P.GolDarah)) break;
                 cout << "[!] Golongan darah tidak valid!\n";
@@ -284,6 +360,26 @@ void AdminTambahAkun(NodePendonor*& Head) {
             while (true) {
                 cout << "Rhesus (+/-) : ";
                 getline(cin, P.Rhesus);
+                if (P.Rhesus == "0") {
+                    ifstream FileIn("data/Users.csv");
+                    ofstream FileTmp("data/Users_tmp.csv");
+                    string Line; bool Pertama = true;
+                    while (getline(FileIn, Line)) {
+                        if (Line.empty()) continue;
+                        istringstream Iss(Line);
+                        string U, Pw, R;
+                        getline(Iss, U, ','); getline(Iss, Pw, ','); getline(Iss, R);
+                        if (U != Username) {
+                            if (!Pertama) FileTmp << "\n";
+                            FileTmp << U << "," << Pw << "," << R;
+                            Pertama = false;
+                        }
+                    }
+                    FileIn.close(); FileTmp.close();
+                    remove("data/Users.csv"); rename("data/Users_tmp.csv", "data/Users.csv");
+                    cout << "[!] Dibatalkan. Akun tidak jadi ditambahkan.\n";
+                    return;
+                }
                 if (P.Rhesus == "+" || P.Rhesus == "-") break;
                 cout << "[!] Rhesus harus '+' atau '-'!\n";
             }
@@ -291,15 +387,60 @@ void AdminTambahAkun(NodePendonor*& Head) {
             while (true) {
                 cout << "Alamat : ";
                 getline(cin, P.Alamat);
+                if (P.Alamat == "0") {
+                    ifstream FileIn("data/Users.csv");
+                    ofstream FileTmp("data/Users_tmp.csv");
+                    string Line; bool Pertama = true;
+                    while (getline(FileIn, Line)) {
+                        if (Line.empty()) continue;
+                        istringstream Iss(Line);
+                        string U, Pw, R;
+                        getline(Iss, U, ','); getline(Iss, Pw, ','); getline(Iss, R);
+                        if (U != Username) {
+                            if (!Pertama) FileTmp << "\n";
+                            FileTmp << U << "," << Pw << "," << R;
+                            Pertama = false;
+                        }
+                    }
+                    FileIn.close(); FileTmp.close();
+                    remove("data/Users.csv"); rename("data/Users_tmp.csv", "data/Users.csv");
+                    cout << "[!] Dibatalkan. Akun tidak jadi ditambahkan.\n";
+                    return;
+                }
                 if (!P.Alamat.empty()) break;
                 cout << "[!] Alamat tidak boleh kosong!\n";
             }
 
             while (true) {
-                cout << "Nomor Telepon : ";
+                cout << "Nomor Telepon (11-13 digit) : ";
                 getline(cin, P.NomorTelepon);
-                if (!P.NomorTelepon.empty()) break;
-                cout << "[!] Nomor telepon tidak boleh kosong!\n";
+                if (P.NomorTelepon == "0") {
+                    ifstream FileIn("data/Users.csv");
+                    ofstream FileTmp("data/Users_tmp.csv");
+                    string Line; bool Pertama = true;
+                    while (getline(FileIn, Line)) {
+                        if (Line.empty()) continue;
+                        istringstream Iss(Line);
+                        string U, Pw, R;
+                        getline(Iss, U, ','); getline(Iss, Pw, ','); getline(Iss, R);
+                        if (U != Username) {
+                            if (!Pertama) FileTmp << "\n";
+                            FileTmp << U << "," << Pw << "," << R;
+                            Pertama = false;
+                        }
+                    }
+                    FileIn.close(); FileTmp.close();
+                    remove("data/Users.csv"); rename("data/Users_tmp.csv", "data/Users.csv");
+                    cout << "[!] Dibatalkan. Akun tidak jadi ditambahkan.\n";
+                    return;
+                }
+                if (P.NomorTelepon.length() < 11 || P.NomorTelepon.length() > 13) {
+                    cout << "[!] Nomor telepon harus 11-13 digit!\n"; continue;
+                }
+                bool SemuaAngka = true;
+                for (char c : P.NomorTelepon) if (!isdigit(c)) { SemuaAngka = false; break; }
+                if (!SemuaAngka) { cout << "[!] Nomor telepon harus berupa angka!\n"; continue; }
+                break;
             }
 
             char PernaDonor;
@@ -320,9 +461,19 @@ void AdminTambahAkun(NodePendonor*& Head) {
                     if (ValidasiTanggal(TglTerakhir)) break;
                     cout << "[!] Tanggal tidak valid! Pastikan format YYYY-MM-DD dan bukan tanggal masa depan.\n";
                 }
+
+                // Fix newline Riwayat.csv
+                bool RiwayatKosong = true;
+                ifstream CekRiwayat("data/Riwayat.csv");
+                if (CekRiwayat.is_open()) {
+                    CekRiwayat.seekg(0, ios::end);
+                    RiwayatKosong = (CekRiwayat.tellg() == 0);
+                    CekRiwayat.close();
+                }
                 ofstream FileRiwayat("data/Riwayat.csv", ios::app);
                 if (FileRiwayat.is_open()) {
-                    FileRiwayat << Username << "," << TglTerakhir << ",PMI,1,Sukses\n";
+                    if (!RiwayatKosong) FileRiwayat << "\n";
+                    FileRiwayat << Username << "," << TglTerakhir << ",PMI,1,Sukses";
                     FileRiwayat.close();
                 }
             }
@@ -532,7 +683,7 @@ void AdminEditDataDiri(NodePendonor*& Head) {
 
             ifstream FileIn("data/Users.csv");
             ofstream FileTmp("data/Users_tmp.csv");
-            string Line;
+            string Line; bool Pertama = true;
             while (getline(FileIn, Line)) {
                 if (Line.empty()) continue;
                 istringstream Iss(Line);
@@ -540,8 +691,10 @@ void AdminEditDataDiri(NodePendonor*& Head) {
                 getline(Iss, U, ',');
                 getline(Iss, Pw, ',');
                 getline(Iss, R);
-                if (U == UsernameLama) FileTmp << NilaBaru << "," << Pw << "," << R << "\n";
-                else FileTmp << U << "," << Pw << "," << R << "\n";
+                if (!Pertama) FileTmp << "\n";
+                if (U == UsernameLama) FileTmp << NilaBaru << "," << Pw << "," << R;
+                else FileTmp << U << "," << Pw << "," << R;
+                Pertama = false;
             }
             FileIn.close(); FileTmp.close();
             remove("data/Users.csv");
@@ -549,13 +702,16 @@ void AdminEditDataDiri(NodePendonor*& Head) {
 
             ifstream FileRIn("data/Riwayat.csv");
             ofstream FileRTmp("data/Riwayat_tmp.csv");
+            Pertama = true;
             while (getline(FileRIn, Line)) {
                 if (Line.empty()) continue;
                 istringstream Iss(Line);
                 string U2; getline(Iss, U2, ',');
                 string Sisa; getline(Iss, Sisa);
-                if (U2 == UsernameLama) FileRTmp << NilaBaru << "," << Sisa << "\n";
-                else FileRTmp << Line << "\n";
+                if (!Pertama) FileRTmp << "\n";
+                if (U2 == UsernameLama) FileRTmp << NilaBaru << "," << Sisa;
+                else FileRTmp << U2 << "," << Sisa;
+                Pertama = false;
             }
             FileRIn.close(); FileRTmp.close();
             remove("data/Riwayat.csv");
@@ -635,11 +791,16 @@ void AdminEditDataDiri(NodePendonor*& Head) {
         }
         case 7: {
             while (true) {
-                cout << "No. Telepon baru (0=batal): ";
+                cout << "No. Telepon baru (11-13 digit, 0=batal): ";
                 getline(cin, NilaBaru);
                 if (NilaBaru == "0") { cout << "[!] Dibatalkan.\n"; return; }
-                if (!NilaBaru.empty()) break;
-                cout << "[!] No. Telepon tidak boleh kosong!\n";
+                if (NilaBaru.length() < 11 || NilaBaru.length() > 13) {
+                    cout << "[!] Nomor telepon harus 11-13 digit!\n"; continue;
+                }
+                bool SemuaAngka = true;
+                for (char c : NilaBaru) if (!isdigit(c)) { SemuaAngka = false; break; }
+                if (!SemuaAngka) { cout << "[!] Nomor telepon harus berupa angka!\n"; continue; }
+                break;
             }
             P.NomorTelepon = NilaBaru;
             SimpanPendonorKeFile(Head);
@@ -657,7 +818,7 @@ void AdminEditDataDiri(NodePendonor*& Head) {
             }
             ifstream FileIn("data/Users.csv");
             ofstream FileTmp("data/Users_tmp.csv");
-            string Line;
+            string Line; bool Pertama = true;
             while (getline(FileIn, Line)) {
                 if (Line.empty()) continue;
                 istringstream Iss(Line);
@@ -665,8 +826,10 @@ void AdminEditDataDiri(NodePendonor*& Head) {
                 getline(Iss, U, ',');
                 getline(Iss, Pw, ',');
                 getline(Iss, R);
-                if (U == P.Username) FileTmp << U << "," << NilaBaru << "," << R << "\n";
-                else FileTmp << U << "," << Pw << "," << R << "\n";
+                if (!Pertama) FileTmp << "\n";
+                if (U == P.Username) FileTmp << U << "," << NilaBaru << "," << R;
+                else FileTmp << U << "," << Pw << "," << R;
+                Pertama = false;
             }
             FileIn.close(); FileTmp.close();
             remove("data/Users.csv");
@@ -708,13 +871,14 @@ void AdminUpdateRiwayat(NodePendonor*& Head) {
         getline(cin, TglBaru);
         if (TglBaru == "0") { cout << "[!] Dibatalkan.\n"; return; }
         if (ValidasiTanggal(TglBaru)) break;
-        cout << "[!] Tanggal tidak valid! Pastikan format YYYY-MM-DD dan bukan tanggal masa depan.\n";
+        cout << "[!] Tanggal tidak valid! Pastikan format YYYY-MM-DD dan jangan tanggal masa depan woy.\n";
     }
 
     string Lokasi;
     while (true) {
         cout << "Input Lokasi donor (contoh: PMI_Pusat) : ";
         getline(cin, Lokasi);
+        if (Lokasi == "0") { cout << "[!] Dibatalkan.\n"; return; }
         if (!Lokasi.empty()) break;
         cout << "[!] Lokasi tidak boleh kosong!\n";
     }
@@ -748,18 +912,32 @@ void AdminHapusPendonor(NodePendonor*& Head) {
     }
 
     TampilSemuaPendonor(Head);
-    cout << "(ketik '0' untuk batal)\n";
 
-    string Username;
+    int TotalData = 0;
+    NodePendonor* Curr = Head;
+    while (Curr != nullptr) { TotalData++; Curr = Curr->Next; }
+
+    cout << "(input '0' untuk batal)\n";
+    int NomorPilih;
+    cin.ignore();
+    while (true) {
+        cout << "\nInput nomor yang ingin dihapus: ";
+        if (!(cin >> NomorPilih)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "[!] Input tidak valid!\n";
+            continue;
+        }
+        if (NomorPilih == 0) { cout << "[!] Dibatalkan.\n"; return; }
+        if (NomorPilih >= 1 && NomorPilih <= TotalData) break;
+        cout << "[!] Nomor tidak valid! Masukkan 1-" << TotalData << "\n";
+    }
     cin.ignore();
 
-    while (true) {
-        cout << "\nInput Username yang ingin dihapus: ";
-        getline(cin, Username);
-        if (Username == "0") { cout << "[!] Dibatalkan.\n"; return; }
-        if (CariPendonorByUsername(Head, Username) != nullptr) break;
-        cout << "[!] Username tidak ditemukan! Coba lagi.\n";
-    }
+    string Username;
+    NodePendonor* Cari = Head;
+    for (int i = 1; i < NomorPilih; i++) Cari = Cari->Next;
+    Username = Cari->Data.Username;
 
     char Konfirmasi;
     cout << "Yakin hapus '" << Username << "'? (y/n): ";
@@ -775,7 +953,7 @@ void AdminHapusPendonor(NodePendonor*& Head) {
 
     ifstream FileIn("data/Users.csv");
     ofstream FileTmp("data/Users_tmp.csv");
-    string Line;
+    string Line; bool Pertama = true;
     while (getline(FileIn, Line)) {
         if (Line.empty()) continue;
         istringstream Iss(Line);
@@ -783,7 +961,11 @@ void AdminHapusPendonor(NodePendonor*& Head) {
         getline(Iss, U, ',');
         getline(Iss, P, ',');
         getline(Iss, R);
-        if (U != Username) FileTmp << U << "," << P << "," << R << "\n";
+        if (U != Username) {
+            if (!Pertama) FileTmp << "\n";
+            FileTmp << U << "," << P << "," << R;
+            Pertama = false;
+        }
     }
     FileIn.close(); FileTmp.close();
     remove("data/Users.csv");
@@ -791,12 +973,18 @@ void AdminHapusPendonor(NodePendonor*& Head) {
 
     ifstream FileRIn("data/Riwayat.csv");
     ofstream FileRTmp("data/Riwayat_tmp.csv");
+    Pertama = true;
     while (getline(FileRIn, Line)) {
         if (Line.empty()) continue;
         istringstream Iss(Line);
         string UName;
         getline(Iss, UName, ',');
-        if (UName != Username) FileRTmp << Line << "\n";
+        string Sisa; getline(Iss, Sisa);
+        if (UName != Username) {
+            if (!Pertama) FileRTmp << "\n";
+            FileRTmp << UName << "," << Sisa;
+            Pertama = false;
+        }
     }
     FileRIn.close(); FileRTmp.close();
     remove("data/Riwayat.csv");

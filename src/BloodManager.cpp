@@ -200,15 +200,18 @@ void SimpanPendonorKeFile(NodePendonor* Head) {
     ofstream File("data/Pendonor.csv");
     if (!File.is_open()) return;
     NodePendonor* Curr = Head;
+    bool Pertama = true;
     while (Curr != nullptr) {
         Pendonor& P = Curr->Data;
+        if (!Pertama) File << "\n";
         File << P.Username     << ","
              << P.Nik          << ","
              << P.Nama         << ","
              << P.GolDarah     << ","
              << P.Rhesus       << ","
              << P.Alamat       << ","
-             << P.NomorTelepon << "\n";
+             << P.NomorTelepon;
+        Pertama = false;
         Curr = Curr->Next;
     }
     File.close();
@@ -241,7 +244,7 @@ void SimpanStokKeFile(const StokDarah& Stok) {
     File << Stok.StokA  << ","
          << Stok.StokB  << ","
          << Stok.StokAB << ","
-         << Stok.StokO  << "\n";
+         << Stok.StokO;
     File.close();
 }
 
@@ -289,13 +292,22 @@ bool StokKosong(const StokDarah& Stok) {
 }
 
 void TambahRiwayat(const RiwayatDonor& Riwayat) {
+    bool FileKosong = true;
+    ifstream CekAkhir("data/Riwayat.csv");
+    if (CekAkhir.is_open()) {
+        CekAkhir.seekg(0, ios::end);
+        FileKosong = (CekAkhir.tellg() == 0);
+        CekAkhir.close();
+    }
+
     ofstream File("data/Riwayat.csv", ios::app);
     if (!File.is_open()) return;
+    if (!FileKosong) File << "\n";
     File << Riwayat.username      << ","
          << Riwayat.TanggalDonor  << ","
          << Riwayat.Lokasi        << ","
          << Riwayat.JumlahKantong << ","
-         << Riwayat.Keterangan    << "\n";
+         << Riwayat.Keterangan;
     File.close();
 }
 
@@ -311,7 +323,7 @@ string AmbilTglTerakhir(const string& Username) {
         getline(Iss, U,   ',');
         getline(Iss, Tgl, ',');
         getline(Iss, Lok, ',');
-        Iss.ignore(numeric_limits<streamsize>::max(), ','); 
+        Iss.ignore(numeric_limits<streamsize>::max(), ',');
         getline(Iss, Ket);
         if (U == Username && Ket == "Sukses") TglTerakhir = Tgl;
     }
