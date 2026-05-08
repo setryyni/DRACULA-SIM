@@ -21,7 +21,7 @@ int main() {
             MenuAdmin(userAktif, headPendonor, stokDarah);
         } 
         else if (userAktif.Role == "user") {
-            menuUser(userAktif);
+            menuUser(userAktif, headPendonor);
         }
     }
     

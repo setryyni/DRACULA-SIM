@@ -37,7 +37,7 @@ bool RegisterAkun() {
 
     if (UsernameBaru == "0") return false; 
 
-    ifstream FileIn("data/users.csv");
+    ifstream FileIn("data/Users.csv");
     if (FileIn.is_open()) {
         string barisData;
         User U;
@@ -77,9 +77,18 @@ bool RegisterAkun() {
         break; 
     }
 
-    ofstream FileOut("data/users.csv", ios::app);
+    bool FileKosong = true;
+    ifstream CekAkhir("data/Users.csv");
+    if (CekAkhir.is_open()) {
+        CekAkhir.seekg(0, ios::end);
+        FileKosong = (CekAkhir.tellg() == 0);
+        CekAkhir.close();
+    }
+
+    ofstream FileOut("data/Users.csv", ios::app);
     if (FileOut.is_open()) {
-        FileOut << UsernameBaru << "," << PasswordBaru << ",pendonor\n";
+        if (!FileKosong) FileOut << "\n";
+        FileOut << UsernameBaru << "," << PasswordBaru << ",pendonor";
         FileOut.close();
         cout << "\n[OK] Registrasi berhasil! Silakan login.\n";
         return true;
@@ -110,15 +119,16 @@ User LoginAkun() {
                 int sisaWaktu = totalWaktu - waktuBerjalan;
                 float persentase = (float)waktuBerjalan / totalWaktu;
                 int posisiBar = lebarBar * persentase;
+                int persen = persentase * 100;
 
-                cout << "\r⏳ Membuka kunci: [";
+                cout << "\rMembuka kunci: [";
                 for (int j = 0; j < lebarBar; ++j) {
-                    if (j < posisiBar) cout << "█"; 
-                    else cout << " ";               
+                    if (j < posisiBar) cout << "=";
+                    else cout << " ";
                 }
-                cout << "] " << sisaWaktu << " detik tersisa... " << flush;
+                cout << "] " << persen << "% | " << sisaWaktu << " detik tersisa... " << flush;
 
-                if (waktuBerjalan < totalWaktu) Tunggu(1); 
+                if (waktuBerjalan < totalWaktu) Tunggu(1);
             }
             
             cout << "\n\n[OK] Kunci terbuka. Silakan coba lagi.\n";
@@ -164,7 +174,7 @@ User LoginAkun() {
             continue; 
         }
 
-        ifstream File("data/users.csv");
+        ifstream File("data/Users.csv");
         if (!File.is_open()) {
             cout << "\n[!] Database tidak ditemukan!\n";
             cout << "[!] Silakan Register akun terlebih dahulu.\n";
@@ -234,7 +244,7 @@ User MulaiAuth() {
                 Utils::tekanEnter();
                 break;
             case 3:
-                cout << "\nSampai jumpa lagi, Yar!\n";
+                cout << "\nSampai jumpa lagi!\n";
                 exit(0);
             default:
                 cout << "\n[!] Pilihan tidak tersedia.\n";

@@ -8,7 +8,7 @@
 #include <string>
 using namespace std;
 
-void menuUser(const User& UserAktif) {
+void menuUser(const User& UserAktif, NodePendonor*& Head) {
     int pilihan;
     bool lanjut = true;
 
@@ -31,10 +31,11 @@ void menuUser(const User& UserAktif) {
             cin.ignore(1000, '\n');
             continue;
         }
+        cin.ignore(1000, '\n');
 
         switch (pilihan) {
             case 1:
-                Profil(UserAktif);
+                Profil(UserAktif, Head);
                 break;
             case 2:
                 cekJadwal(UserAktif);
@@ -57,7 +58,7 @@ void menuUser(const User& UserAktif) {
     }
 }
 
-void Profil(const User& UserAktif) {
+void Profil(const User& UserAktif, NodePendonor*& Head) {
     ifstream file("data/Pendonor.csv");
     Pendonor p;
     bool ditemukan = false;
@@ -116,6 +117,7 @@ void Profil(const User& UserAktif) {
         while (true) {
             cout << "Gol. Darah (A/B/AB/O) : ";
             getline(cin, p.GolDarah);
+            p.GolDarah = NormalisasiGolDarah(p.GolDarah);
             if (ValidasiGolDarah(p.GolDarah)) break;
             cout << "[!] Golongan darah tidak valid!\n";
         }
@@ -211,6 +213,8 @@ void Profil(const User& UserAktif) {
                 << p.NomorTelepon;
             out.close();
         }
+
+        TambahPendonor(Head, p);
 
         cout << "\n[+] Data berhasil disimpan!\n";
     }
