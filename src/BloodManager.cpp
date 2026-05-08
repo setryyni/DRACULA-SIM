@@ -9,10 +9,6 @@
 
 using namespace std;
 
-void InitList(NodePendonor*& Head) {
-    Head = nullptr;
-}
-
 void TambahPendonor(NodePendonor*& Head, const Pendonor& DataBaru) {
     NodePendonor* NodeBaru = new NodePendonor();
     NodeBaru->Data = DataBaru;
@@ -67,9 +63,6 @@ int HitungPendonor(NodePendonor* Head) {
     return Count;
 }
 
-bool ListKosong(NodePendonor* Head) {
-    return Head == nullptr;
-}
 
 void SortByNamaAZ(NodePendonor*& Head) {
     if (Head == nullptr || Head->Next == nullptr) return;
@@ -356,9 +349,6 @@ bool ValidasiTanggal(const string& Tanggal) {
     return true;
 }
 
-int HitungSelisihHari(const string& TglTerakhir) {
-    return Utils::hitungSelisihHari(TglTerakhir);
-}
 
 bool CekUsernameAdaDiFile(const string& Username) {
     ifstream File("data/Users.csv");

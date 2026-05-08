@@ -96,22 +96,22 @@ void Profil(const User& UserAktif) {
 
         p.Username = UserAktif.Username;
 
-        while (true) {    
+        while (true) {
             cout << "NIK (16 digit) : ";
-                getline(cin, p.Nik);
-                if (p.Nik.length() != 16) { cout << "[!] NIK harus 16 digit!\n"; continue; }
-                bool SemuaAngka = true;
-                for (char c : p.Nik) if (!isdigit(c)) { SemuaAngka = false; break; }
-                if (!SemuaAngka) { cout << "[!] NIK harus berupa angka!\n"; continue; }
-                break;
-            }
+            getline(cin, p.Nik);
+            if (p.Nik.length() != 16) { cout << "[!] NIK harus 16 digit!\n"; continue; }
+            bool SemuaAngka = true;
+            for (char c : p.Nik) if (!isdigit(c)) { SemuaAngka = false; break; }
+            if (!SemuaAngka) { cout << "[!] NIK harus berupa angka!\n"; continue; }
+            break;
+        }
 
         while (true) {
-                cout << "Nama Lengkap   : ";
-                getline(cin, p.Nama);
-                if (!p.Nama.empty()) break;
-                cout << "[!] Nama tidak boleh kosong!\n";
-            }
+            cout << "Nama Lengkap   : ";
+            getline(cin, p.Nama);
+            if (!p.Nama.empty()) break;
+            cout << "[!] Nama tidak boleh kosong!\n";
+        }
 
         while (true) {
             cout << "Gol. Darah (A/B/AB/O) : ";
@@ -135,10 +135,15 @@ void Profil(const User& UserAktif) {
         }
 
         while (true) {
-            cout << "Nomor Telepon : ";
+            cout << "Nomor Telepon (11-13 digit) : ";
             getline(cin, p.NomorTelepon);
-            if (!p.NomorTelepon.empty()) break;
-            cout << "[!] Nomor telepon tidak boleh kosong!\n";
+            if (p.NomorTelepon.length() < 11 || p.NomorTelepon.length() > 13) {
+                cout << "[!] Nomor telepon harus 11-13 digit!\n"; continue;
+            }
+            bool SemuaAngka = true;
+            for (char c : p.NomorTelepon) if (!isdigit(c)) { SemuaAngka = false; break; }
+            if (!SemuaAngka) { cout << "[!] Nomor telepon harus berupa angka!\n"; continue; }
+            break;
         }
 
         char pernahDonor;
@@ -146,10 +151,8 @@ void Profil(const User& UserAktif) {
             cout << "\nPernah donor sebelumnya? (y/n): ";
             cin >> pernahDonor;
             cin.ignore(1000, '\n');
-
             if (pernahDonor == 'y' || pernahDonor == 'Y' ||
                 pernahDonor == 'n' || pernahDonor == 'N') break;
-
             cout << "[!] Input harus y atau n!\n";
         }
 
@@ -159,7 +162,6 @@ void Profil(const User& UserAktif) {
             while (true) {
                 cout << "Tanggal donor terakhir (YYYY-MM-DD): ";
                 getline(cin, tanggal);
-
                 if (ValidasiTanggal(tanggal)) break;
                 cout << "[!] Format tanggal salah!\n";
             }
@@ -167,31 +169,48 @@ void Profil(const User& UserAktif) {
             while (true) {
                 cout << "Lokasi donor: ";
                 getline(cin, lokasi);
-
                 if (!lokasi.empty()) break;
                 cout << "[!] Lokasi tidak boleh kosong!\n";
             }
 
+            bool RiwayatKosong = true;
+            ifstream CekRiwayat("data/Riwayat.csv");
+            if (CekRiwayat.is_open()) {
+                CekRiwayat.seekg(0, ios::end);
+                RiwayatKosong = (CekRiwayat.tellg() == 0);
+                CekRiwayat.close();
+            }
             ofstream fileRiwayat("data/Riwayat.csv", ios::app);
             if (fileRiwayat.is_open()) {
+                if (!RiwayatKosong) fileRiwayat << "\n";
                 fileRiwayat << p.Username << ","
                             << tanggal << ","
                             << lokasi << ","
                             << "1,"
-                            << "Data awal\n";
+                            << "Data awal";
                 fileRiwayat.close();
             }
         }
 
+        bool PendonorKosong = true;
+        ifstream CekPendonor("data/Pendonor.csv");
+        if (CekPendonor.is_open()) {
+            CekPendonor.seekg(0, ios::end);
+            PendonorKosong = (CekPendonor.tellg() == 0);
+            CekPendonor.close();
+        }
         ofstream out("data/Pendonor.csv", ios::app);
-        out << p.Username << ","
-            << p.Nik << ","
-            << p.Nama << ","
-            << p.GolDarah << ","
-            << p.Rhesus << ","
-            << p.Alamat << ","
-            << p.NomorTelepon << endl;
-        out.close();
+        if (out.is_open()) {
+            if (!PendonorKosong) out << "\n";
+            out << p.Username << ","
+                << p.Nik << ","
+                << p.Nama << ","
+                << p.GolDarah << ","
+                << p.Rhesus << ","
+                << p.Alamat << ","
+                << p.NomorTelepon;
+            out.close();
+        }
 
         cout << "\n[+] Data berhasil disimpan!\n";
     }
@@ -216,16 +235,14 @@ void cekJadwal(const User& UserAktif) {
         return;
     }
 
-    int selisih = HitungSelisihHari(tglTerakhir);
+    int selisih = Utils::hitungSelisihHari(tglTerakhir);
     int batas = 90;
     int sisa = batas - selisih;
 
-    // Informasi utama
     cout << setw(20) << "Donor terakhir" << ": " << tglTerakhir << endl;
     cout << setw(20) << "Jeda hari"      << ": " << selisih << " hari\n";
     cout << "----------------------------------------\n";
 
-    // Status
     if (selisih >= batas) {
         cout << setw(20) << "Status"     << ": SUDAH BOLEH DONOR\n";
         cout << setw(20) << "Keterangan" << ": Silakan donor kembali\n";
@@ -285,7 +302,6 @@ void riwayatDonor(const User& UserAktif) {
     Utils::tekanEnter();
 }
 
-// informasi syarat donor
 void edukasi() {
     int pilih;
     do {

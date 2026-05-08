@@ -41,10 +41,9 @@ bool RegisterAkun() {
     if (FileIn.is_open()) {
         string barisData;
         User U;
-        // Membaca per baris dari file CSV
+        
         while (getline(FileIn, barisData)) {
             stringstream ss(barisData);
-            // Memotong data berdasarkan tanda koma (,)
             getline(ss, U.Username, ',');
             getline(ss, U.Password, ',');
             getline(ss, U.Role, ',');

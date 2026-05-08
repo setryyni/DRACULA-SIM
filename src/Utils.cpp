@@ -33,15 +33,14 @@ namespace Utils {
 
     int hitungSelisihHari(string tanggalTerakhir) {
         if (tanggalTerakhir == "" || tanggalTerakhir == "-") {
-            return 999; 
+            return 999;
         }
 
         struct tm t_input = {0};
         stringstream ss(tanggalTerakhir);
         char dash1, dash2;
         int year, month, day;
-        
-        // Memisahkan string berdasarkan tanda '-'
+
         if (!(ss >> year >> dash1 >> month >> dash2 >> day)) return -1;
 
         t_input.tm_year = year - 1900;
@@ -49,23 +48,12 @@ namespace Utils {
         t_input.tm_mday = day;
 
         time_t time_input = mktime(&t_input);
-        time_t time_now = time(0); 
+        time_t time_now = time(0);
 
         if (time_input == -1) return -1;
 
         double detik = difftime(time_now, time_input);
-        
+
         return detik / (60 * 60 * 24);
-    }
-
-    bool cekKelayakanWaktu(string tanggalTerakhir) {
-        int selisih = hitungSelisihHari(tanggalTerakhir);
-        const int MIN_HARI = 90; 
-
-        if (selisih >= MIN_HARI) {
-            return true;
-        } else {
-            return false;
-        }
     }
 }

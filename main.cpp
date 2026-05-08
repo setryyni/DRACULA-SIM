@@ -10,7 +10,6 @@ using namespace std;
 
 int main() {
     NodePendonor* headPendonor = nullptr;
-    InitList(headPendonor);
 
     MuatPendonorDariFile(headPendonor);
     StokDarah stokDarah = MuatStokDariFile();
@@ -24,7 +23,6 @@ int main() {
         else if (userAktif.Role == "user") {
             menuUser(userAktif);
         }
-
     }
     
     return 0;

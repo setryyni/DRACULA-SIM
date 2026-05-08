@@ -618,7 +618,7 @@ void AdminEditDataDiri(NodePendonor*& Head) {
     Utils::bersihkanLayar();
     cout << "=== EDIT DATA DIRI PENDONOR ===\n";
 
-    if (ListKosong(Head)) {
+    if (Head == nullptr) {
         cout << "[!] Belum ada data pendonor.\n";
         return;
     }
@@ -847,7 +847,7 @@ void AdminUpdateRiwayat(NodePendonor*& Head) {
     Utils::bersihkanLayar();
     cout << "=== UPDATE RIWAYAT PENDONOR ===\n";
 
-    if (ListKosong(Head)) {
+    if (Head == nullptr) {
         cout << "[!] Belum ada data.\n";
         return;
     }
@@ -871,7 +871,7 @@ void AdminUpdateRiwayat(NodePendonor*& Head) {
         getline(cin, TglBaru);
         if (TglBaru == "0") { cout << "[!] Dibatalkan.\n"; return; }
         if (ValidasiTanggal(TglBaru)) break;
-        cout << "[!] Tanggal tidak valid! Pastikan format YYYY-MM-DD dan jangan tanggal masa depan woy.\n";
+        cout << "[!] Tanggal tidak valid! Pastikan format YYYY-MM-DD dan bukan tanggal masa depan.\n";
     }
 
     string Lokasi;
@@ -906,7 +906,7 @@ void AdminHapusPendonor(NodePendonor*& Head) {
     Utils::bersihkanLayar();
     cout << "=== HAPUS PENDONOR ===\n";
 
-    if (ListKosong(Head)) {
+    if (Head == nullptr) {
         cout << "[!] Belum ada data.\n";
         return;
     }
@@ -1094,7 +1094,7 @@ void AdminVerifikasiDonor(NodePendonor*& Head) {
     Utils::bersihkanLayar();
     cout << "=== VERIFIKASI DATA ===\n";
 
-    if (ListKosong(Head)) {
+    if (Head == nullptr) {
         cout << "[!] Belum ada data.\n";
         return;
     }
@@ -1171,7 +1171,7 @@ void AdminVerifikasiDonor(NodePendonor*& Head) {
         return;
     }
 
-    int Selisih = HitungSelisihHari(TglTerakhir);
+    int Selisih = Utils::hitungSelisihHari(TglTerakhir);
     if (Selisih < 90) {
         int SisaHari = 90 - Selisih;
         cout << "[X] Output Status: Ga layak donor\n";

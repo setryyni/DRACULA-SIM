@@ -9,15 +9,13 @@ struct NodePendonor {
     NodePendonor* Next;
 };
 
-void InitList(NodePendonor*& Head);
 void TambahPendonor(NodePendonor*& Head, const Pendonor& DataBaru);
 bool HapusPendonor(NodePendonor*& Head, const std::string& Username);
 NodePendonor* CariPendonorByUsername(NodePendonor* Head, const std::string& Username);
 int HitungPendonor(NodePendonor* Head);
-bool ListKosong(NodePendonor* Head);
-void SortByNamaAZ(NodePendonor*& Head);   
-void SortByNamaZA(NodePendonor*& Head);   
-void SortByRole(NodePendonor*& Head);     
+void SortByNamaAZ(NodePendonor*& Head);
+void SortByNamaZA(NodePendonor*& Head);
+void SortByRole(NodePendonor*& Head);
 NodePendonor* BinarySearchByNama(NodePendonor* SortedHead, const std::string& Nama, int Size);
 void MuatPendonorDariFile(NodePendonor*& Head);
 void SimpanPendonorKeFile(NodePendonor* Head);
@@ -29,7 +27,6 @@ int GetStok(const StokDarah& Stok, const std::string& GolDarah);
 bool StokKosong(const StokDarah& Stok);
 void TambahRiwayat(const RiwayatDonor& Riwayat);
 std::string AmbilTglTerakhir(const std::string& Username);
-int HitungSelisihHari(const std::string& TglTerakhir);
 bool ValidasiTanggal(const std::string& Tanggal);
 bool ValidasiGolDarah(const std::string& GolDarah);
 std::string NormalisasiGolDarah(const std::string& GolDarah);

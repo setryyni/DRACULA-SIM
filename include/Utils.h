@@ -8,7 +8,6 @@ namespace Utils {
     void tekanEnter();
     bool isAngka(std::string input);
     int hitungSelisihHari(std::string tanggalTerakhir);
-    bool cekKelayakanWaktu(std::string tanggalTerakhir);
 }
 
 #endif
