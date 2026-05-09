@@ -5,10 +5,12 @@
 #include "Models.h"
 #include "BloodManager.h"
 
-void menuUser(const User& UserAktif, NodePendonor*& Head);
-void Profil(const User& UserAktif, NodePendonor*& Head);
+void menuUser(User& UserAktif, NodePendonor*& Head);
+void Profil(User& UserAktif, NodePendonor*& Head);
+void EditProfil(User& UserAktif, NodePendonor*& Head);
 void cekJadwal(const User& UserAktif);
 void riwayatDonor(const User& UserAktif);
 void edukasi();
+void HapusAkun(const User& UserAktif, NodePendonor*& Head);
 
 #endif
