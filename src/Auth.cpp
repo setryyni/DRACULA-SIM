@@ -88,7 +88,7 @@ bool RegisterAkun() {
     ofstream FileOut("data/Users.csv", ios::app);
     if (FileOut.is_open()) {
         if (!FileKosong) FileOut << "\n";
-        FileOut << UsernameBaru << "," << PasswordBaru << ",pendonor";
+        FileOut << UsernameBaru << "," << PasswordBaru << ",user";
         FileOut.close();
         cout << "\n[OK] Registrasi berhasil! Silakan login.\n";
         return true;

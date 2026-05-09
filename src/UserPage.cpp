@@ -3,12 +3,13 @@
 #include "../include/UserPage.h"
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <cctype>
 #include <iomanip>
 #include <string>
 using namespace std;
 
-void menuUser(const User& UserAktif, NodePendonor*& Head) {
+void menuUser(User& UserAktif, NodePendonor*& Head) {
     int pilihan;
     bool lanjut = true;
 
@@ -22,9 +23,10 @@ void menuUser(const User& UserAktif, NodePendonor*& Head) {
         cout << " 2. Cek Jadwal\n";
         cout << " 3. Riwayat Donor\n";
         cout << " 4. Informasi Edukasi\n";
-        cout << " 5. Logout\n";
+        cout << " 5. Hapus Akun\n";
+        cout << " 6. Logout\n";
         cout << "----------------------------------------\n";
-        cout << " Pilih menu (1-5): ";
+        cout << " Pilih menu (1-6): ";
         
         if (!(cin >> pilihan)) {
             cin.clear();
@@ -47,18 +49,22 @@ void menuUser(const User& UserAktif, NodePendonor*& Head) {
                 edukasi();
                 break;
             case 5:
+                HapusAkun(UserAktif, Head);
+                lanjut = false;
+                break;
+            case 6:
                 cout << "\nLogout berhasil. Sampai jumpa!\n";
                 lanjut = false;
                 return;
             default:
-                cout << "[!] Pilihan tidak ada. Silakan masukkan angka 1-5." << endl;
+                cout << "[!] Pilihan tidak ada. Silakan masukkan angka 1-6." << endl;
                 Utils::tekanEnter();
                 break;
         }
     }
 }
 
-void Profil(const User& UserAktif, NodePendonor*& Head) {
+void Profil(User& UserAktif, NodePendonor*& Head) {
     ifstream file("data/Pendonor.csv");
     Pendonor p;
     bool ditemukan = false;
@@ -91,6 +97,37 @@ void Profil(const User& UserAktif, NodePendonor*& Head) {
     }
 
     file.close();
+
+    if (ditemukan) {
+
+        int pilih;
+
+        cout << "\n1. Edit Data";
+        cout << "\n0. Kembali";
+        cout << "\nPilih : ";
+
+        if (!(cin >> pilih)) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+
+            cout << "[!] Input tidak valid!\n";
+            Utils::tekanEnter();
+            return;
+        }
+
+        cin.ignore();
+
+        if (pilih == 1) {
+            EditProfil(UserAktif, Head);
+        }
+        else if (pilih == 0) {
+            return;
+        }
+        else {
+            cout << "[!] Pilihan tidak valid!\n";
+            Utils::tekanEnter();
+        }
+    }
 
     if (!ditemukan) {
         cout << "\n[!] Data belum ada, silakan isi.\n";
@@ -222,6 +259,394 @@ void Profil(const User& UserAktif, NodePendonor*& Head) {
     Utils::tekanEnter();
 }
 
+void EditProfil(User& UserAktif, NodePendonor*& Head) {
+    Utils::bersihkanLayar();
+    string UsernameLamaSession = UserAktif.Username;
+    ifstream File("data/Pendonor.csv");
+
+    if (!File.is_open()) {
+        cout << "[!] File tidak ditemukan!\n";
+        return;
+    }
+
+    Pendonor p;
+    bool Ditemukan = false;
+
+    while (getline(File, p.Username, ',')) {
+        getline(File, p.Nik, ',');
+        getline(File, p.Nama, ',');
+        getline(File, p.GolDarah, ',');
+        getline(File, p.Rhesus, ',');
+        getline(File, p.Alamat, ',');
+        getline(File, p.NomorTelepon);
+
+        if (p.Username == UserAktif.Username) {
+            Ditemukan = true;
+            break;
+        }
+    }
+
+    File.close();
+
+    if (!Ditemukan) {
+        cout << "[!] Data tidak ditemukan!\n";
+        return;
+    }
+
+    cout << "\n========================================\n";
+    cout << "              DATA DIRI\n";
+    cout << "========================================\n";
+    cout << left << setw(20) << "1. Username"       << ": " << p.Username << "\n";
+    cout << left << setw(20) << "2. NIK"            << ": " << p.Nik << "\n";
+    cout << left << setw(20) << "3. Nama"           << ": " << p.Nama << "\n";
+    cout << left << setw(20) << "4. Golongan Darah" << ": " << p.GolDarah << "\n";
+    cout << left << setw(20) << "5. Rhesus"         << ": " << p.Rhesus << "\n";
+    cout << left << setw(20) << "6. Alamat"         << ": " << p.Alamat << "\n";
+    cout << left << setw(20) << "7. No HP"          << ": " << p.NomorTelepon << "\n";
+    cout << "========================================\n";
+    cout << "\nPilih data yang ingin diedit (0 untuk batal): ";
+
+
+    int Pilihan;
+
+    if (!(cin >> Pilihan)) {
+        cin.clear();
+        cin.ignore(1000, '\n');
+
+        cout << "[!] Input tidak valid!\n";
+        return;
+    }
+
+    cin.ignore();
+
+    if (Pilihan == 0) {
+        cout << "[!] Dibatalkan.\n";
+        return;
+    }
+
+    string NilaiBaru;
+
+    switch (Pilihan) {
+
+        case 1: {
+
+            while (true) {
+
+                cout << "Username baru (kosong=batal): ";
+                getline(cin, NilaiBaru);
+
+                if (NilaiBaru.empty()) {
+                    cout << "[!] Edit dibatalkan.\n";
+                    return;
+                }
+
+                if (CekUsernameAdaDiFile(NilaiBaru)) {
+                    cout << "[!] Username sudah digunakan!\n";
+                    continue;
+                }
+
+                break;
+            }
+
+            string UsernameLama = p.Username;
+            p.Username = NilaiBaru;
+            UserAktif.Username = NilaiBaru;
+
+            ifstream UserIn("data/Users.csv");
+            ofstream UserTmp("data/Users_tmp.csv");
+
+            string Line;
+            bool Pertama = true;
+
+            while (getline(UserIn, Line)) {
+
+                if (Line.empty()) continue;
+
+                istringstream Iss(Line);
+
+                string U, Pw, Role;
+
+                getline(Iss, U, ',');
+                getline(Iss, Pw, ',');
+                getline(Iss, Role);
+
+                if (!Pertama) UserTmp << "\n";
+
+                if (U == UsernameLama)
+                    UserTmp << NilaiBaru << "," << Pw << "," << Role;
+                else
+                    UserTmp << U << "," << Pw << "," << Role;
+
+                Pertama = false;
+            }
+
+            UserIn.close();
+            UserTmp.close();
+
+            remove("data/Users.csv");
+            rename("data/Users_tmp.csv", "data/Users.csv");
+
+            ifstream RiwayatIn("data/Riwayat.csv");
+            ofstream RiwayatTmp("data/Riwayat_tmp.csv");
+
+            Pertama = true;
+
+            while (getline(RiwayatIn, Line)) {
+
+                if (Line.empty()) continue;
+
+                istringstream Iss(Line);
+
+                string U;
+                getline(Iss, U, ',');
+
+                string Sisa;
+                getline(Iss, Sisa);
+
+                if (!Pertama) RiwayatTmp << "\n";
+
+                if (U == UsernameLama)
+                    RiwayatTmp << NilaiBaru << "," << Sisa;
+                else
+                    RiwayatTmp << U << "," << Sisa;
+
+                Pertama = false;
+            }
+
+            RiwayatIn.close();
+            RiwayatTmp.close();
+
+            remove("data/Riwayat.csv");
+            rename("data/Riwayat_tmp.csv", "data/Riwayat.csv");
+
+            cout << "[OK] Username berhasil diubah!\n";
+            break;
+        }
+
+        case 2: {
+
+            while (true) {
+
+                cout << "NIK baru (16 digit, kosong=batal): ";
+                getline(cin, NilaiBaru);
+
+                if (NilaiBaru.empty()) {
+                    cout << "[!] Edit dibatalkan.\n";
+                    return;
+                }
+
+                if (NilaiBaru.length() != 16) {
+                    cout << "[!] NIK harus 16 digit!\n";
+                    continue;
+                }
+
+                bool SemuaAngka = true;
+
+                for (char c : NilaiBaru) {
+                    if (!isdigit(c)) {
+                        SemuaAngka = false;
+                        break;
+                    }
+                }
+
+                if (!SemuaAngka) {
+                    cout << "[!] NIK harus berupa angka!\n";
+                    continue;
+                }
+
+                break;
+            }
+
+            p.Nik = NilaiBaru;
+
+            cout << "[OK] NIK berhasil diubah!\n";
+            break;
+        }
+
+        case 3: {
+
+            while (true) {
+
+                cout << "Nama baru (kosong=batal): ";
+                getline(cin, NilaiBaru);
+
+                if (NilaiBaru.empty()) {
+                    cout << "[!] Edit dibatalkan.\n";
+                    return;
+                }
+
+                break;
+            }
+
+            p.Nama = NilaiBaru;
+
+            cout << "[OK] Nama berhasil diubah!\n";
+            break;
+        }
+
+        case 4: {
+
+            while (true) {
+
+                cout << "Gol. Darah baru (A/B/AB/O, kosong=batal): ";
+                getline(cin, NilaiBaru);
+
+                if (NilaiBaru.empty()) {
+                    cout << "[!] Edit dibatalkan.\n";
+                    return;
+                }
+
+                NilaiBaru = NormalisasiGolDarah(NilaiBaru);
+
+                if (ValidasiGolDarah(NilaiBaru)) break;
+
+                cout << "[!] Golongan darah tidak valid!\n";
+            }
+
+            p.GolDarah = NilaiBaru;
+
+            cout << "[OK] Golongan darah berhasil diubah!\n";
+            break;
+        }
+
+        case 5: {
+
+            while (true) {
+
+                cout << "Rhesus baru (+/-, kosong=batal): ";
+                getline(cin, NilaiBaru);
+
+                if (NilaiBaru.empty()) {
+                    cout << "[!] Edit dibatalkan.\n";
+                    return;
+                }
+
+                if (NilaiBaru == "+" || NilaiBaru == "-") break;
+
+                cout << "[!] Rhesus harus '+' atau '-'\n";
+            }
+
+            p.Rhesus = NilaiBaru;
+
+            cout << "[OK] Rhesus berhasil diubah!\n";
+            break;
+        }
+
+        case 6: {
+
+            while (true) {
+
+                cout << "Alamat baru (kosong=batal): ";
+                getline(cin, NilaiBaru);
+
+                if (NilaiBaru.empty()) {
+                    cout << "[!] Edit dibatalkan.\n";
+                    return;
+                }
+
+                break;
+            }
+
+            p.Alamat = NilaiBaru;
+
+            cout << "[OK] Alamat berhasil diubah!\n";
+            break;
+        }
+
+        case 7: {
+
+            while (true) {
+
+                cout << "No. Telepon baru (11-13 digit, kosong=batal): ";
+                getline(cin, NilaiBaru);
+
+                if (NilaiBaru.empty()) {
+                    cout << "[!] Edit dibatalkan.\n";
+                    return;
+                }
+
+                if (NilaiBaru.length() < 11 || NilaiBaru.length() > 13) {
+                    cout << "[!] Nomor telepon harus 11-13 digit!\n";
+                    continue;
+                }
+
+                bool SemuaAngka = true;
+
+                for (char c : NilaiBaru) {
+                    if (!isdigit(c)) {
+                        SemuaAngka = false;
+                        break;
+                    }
+                }
+
+                if (!SemuaAngka) {
+                    cout << "[!] Nomor telepon harus berupa angka!\n";
+                    continue;
+                }
+
+                break;
+            }
+
+            p.NomorTelepon = NilaiBaru;
+
+            cout << "[OK] Nomor telepon berhasil diubah!\n";
+            break;
+        }
+
+        default:
+            cout << "[!] Pilihan tidak valid!\n";
+            return;
+    }
+
+    ifstream FileIn("data/Pendonor.csv");
+    ofstream FileTmp("data/Pendonor_tmp.csv");
+
+    string Line;
+    bool Pertama = true;
+
+    while (getline(FileIn, Line)) {
+
+        if (Line.empty()) continue;
+
+        istringstream Iss(Line);
+
+        string Username;
+        getline(Iss, Username, ',');
+
+        if (!Pertama) FileTmp << "\n";
+
+        if (Username == UsernameLamaSession) {
+
+            FileTmp << p.Username << ","
+                    << p.Nik << ","
+                    << p.Nama << ","
+                    << p.GolDarah << ","
+                    << p.Rhesus << ","
+                    << p.Alamat << ","
+                    << p.NomorTelepon;
+        }
+        else {
+            FileTmp << Line;
+        }
+
+        Pertama = false;
+    }
+
+    FileIn.close();
+    FileTmp.close();
+
+    remove("data/Pendonor.csv");
+    rename("data/Pendonor_tmp.csv", "data/Pendonor.csv");
+
+    cout << "[OK] Data berhasil diperbarui!\n";
+
+    NodePendonor* Node = CariPendonorByUsername(Head, UsernameLamaSession);
+
+    if (Node != nullptr) {
+        Node->Data = p;
+    }
+}
+
 void cekJadwal(const User& UserAktif) {
     string tglTerakhir = AmbilTglTerakhir(UserAktif.Username);
 
@@ -273,8 +698,10 @@ void riwayatDonor(const User& UserAktif) {
     bool ditemukan = false;
     int no = 1;
 
-    cout << "\n+----+------------+----------------------+--------+---------------+\n";
-    cout << "| No | Tanggal    | Lokasi              | Jumlah | Status        |\n";
+    cout << "\n===================================================================\n";
+    cout << "|                       RIWAYAT DONOR ANDA                          |\n";
+    cout << "===================================================================\n";
+    cout << "| No | Tanggal    | Lokasi               | Jumlah | Status        |\n";
     cout << "+----+------------+----------------------+--------+---------------+\n";
 
     while (getline(file, username, ',')) {
@@ -308,74 +735,103 @@ void riwayatDonor(const User& UserAktif) {
 
 void edukasi() {
     int pilih;
+
     do {
         Utils::bersihkanLayar();
-        cout << "\n================================\n";
-        cout << "         INFORMASI EDUKASI\n";
-        cout << "          DONOR DARAH\n";
-        cout << "================================\n";
-        cout << "1. Syarat Donor Darah\n";
-        cout << "2. Manfaat Donor Darah\n";
-        cout << "3. Kondisi Tidak Boleh Donor\n";
-        cout << "4. Tips Sebelum Donor\n";
-        cout << "0. Kembali\n";
-        cout << "Pilih: ";
+
+        cout << "\n========================================\n";
+        cout << "          INFORMASI EDUKASI\n";
+        cout << "              DONOR DARAH\n";
+        cout << "========================================\n";
+        cout << " 1. Syarat Donor Darah\n";
+        cout << " 2. Manfaat Donor Darah\n";
+        cout << " 3. Kondisi Tidak Boleh Donor\n";
+        cout << " 4. Tips Sebelum Donor\n";
+        cout << " 0. Kembali\n";
+        cout << "----------------------------------------\n";
+        cout << " Pilih menu : ";
 
         if (!(cin >> pilih)) {
             cin.clear();
             cin.ignore(1000, '\n');
+
+            cout << "\n[!] Input harus berupa angka!\n";
+            Utils::tekanEnter();
             continue;
         }
 
-        switch(pilih) {
+        cin.ignore(1000, '\n');
+
+        switch (pilih) {
+
             case 1:
-                cout << "\n================================\n";
-                cout << "         SYARAT DONOR DARAH\n";
-                cout << "================================\n";
-                cout << "- Usia 17 - 60 tahun\n";
-                cout << "- Berat badan minimal 45 kg\n";
-                cout << "- Tekanan darah normal (90/60 - 140/90)\n";
-                cout << "- Kadar hemoglobin minimal 12.5 g/dL\n";
-                cout << "- Dalam kondisi sehat\n";
-                cout << "- Tidak sedang mengonsumsi obat tertentu\n";
-                cout << "- Jarak donor minimal 2-3 bulan\n";
+                Utils::bersihkanLayar();
+
+                cout << "\n========================================\n";
+                cout << "           SYARAT DONOR DARAH\n";
+                cout << "========================================\n";
+                cout << " - Usia 17 - 60 tahun\n";
+                cout << " - Berat badan minimal 45 kg\n";
+                cout << " - Tekanan darah normal\n";
+                cout << "   (90/60 - 140/90 mmHg)\n";
+                cout << " - Hemoglobin minimal 12.5 g/dL\n";
+                cout << " - Dalam kondisi sehat\n";
+                cout << " - Tidak sedang konsumsi obat tertentu\n";
+                cout << " - Jarak donor minimal 2-3 bulan\n";
+                cout << "========================================\n";
+
                 Utils::tekanEnter();
                 break;
 
             case 2:
-                cout << "\n================================\n";
-                cout << "       MANFAAT DONOR DARAH\n";
-                cout << "================================\n";
-                cout << "- Membantu menyelamatkan nyawa orang lain\n";
-                cout << "- Meningkatkan kesehatan jantung\n";
-                cout << "- Merangsang produksi sel darah baru\n";
-                cout << "- Mengurangi risiko kelebihan zat besi\n";
-                cout << "- Mendapatkan pemeriksaan kesehatan gratis\n";
+                Utils::bersihkanLayar();
+
+                cout << "\n========================================\n";
+                cout << "           MANFAAT DONOR DARAH\n";
+                cout << "========================================\n";
+                cout << " - Membantu menyelamatkan nyawa\n";
+                cout << " - Menjaga kesehatan jantung\n";
+                cout << " - Merangsang pembentukan sel darah baru\n";
+                cout << " - Mengurangi kelebihan zat besi\n";
+                cout << " - Mendapat pemeriksaan kesehatan gratis\n";
+                cout << " - Membakar kalori dalam tubuh\n";
+                cout << "========================================\n";
+
                 Utils::tekanEnter();
                 break;
 
             case 3:
-                cout << "\n================================\n";
-                cout << "   KONDISI TIDAK BOLEH DONOR\n";
-                cout << "================================\n";
-                cout << "- Sedang demam atau sakit\n";
-                cout << "- Tekanan darah tidak normal\n";
-                cout << "- Hb rendah\n";
-                cout << "- Baru melakukan operasi\n";
-                cout << "- Memiliki penyakit menular (HIV, Hepatitis)\n";
-                cout << "- Sedang hamil atau menyusui\n";
+                Utils::bersihkanLayar();
+
+                cout << "\n========================================\n";
+                cout << "        KONDISI TIDAK BOLEH DONOR\n";
+                cout << "========================================\n";
+                cout << " - Sedang demam atau sakit\n";
+                cout << " - Tekanan darah tidak normal\n";
+                cout << " - Hemoglobin rendah\n";
+                cout << " - Baru menjalani operasi\n";
+                cout << " - Memiliki penyakit menular\n";
+                cout << "   (HIV, Hepatitis, dll)\n";
+                cout << " - Sedang hamil atau menyusui\n";
+                cout << "========================================\n";
+
                 Utils::tekanEnter();
                 break;
 
             case 4:
-                cout << "\n================================\n";
-                cout << "       TIPS SEBELUM DONOR\n";
-                cout << "================================\n";
-                cout << "- Tidur cukup minimal 6-8 jam\n";
-                cout << "- Makan makanan bergizi sebelum donor\n";
-                cout << "- Minum air putih yang cukup\n";
-                cout << "- Hindari alkohol\n";
-                cout << "- Jangan donor saat perut kosong\n";
+                Utils::bersihkanLayar();
+
+                cout << "\n========================================\n";
+                cout << "            TIPS SEBELUM DONOR\n";
+                cout << "========================================\n";
+                cout << " - Tidur cukup 6 - 8 jam\n";
+                cout << " - Konsumsi makanan bergizi\n";
+                cout << " - Perbanyak minum air putih\n";
+                cout << " - Hindari alkohol dan rokok\n";
+                cout << " - Jangan donor saat perut kosong\n";
+                cout << " - Hindari begadang sebelum donor\n";
+                cout << "========================================\n";
+
                 Utils::tekanEnter();
                 break;
 
@@ -383,10 +839,121 @@ void edukasi() {
                 return;
 
             default:
-                cout << "\n[!] Pilihan tidak tersedia.\n";
+                cout << "\n[!] Pilihan tidak tersedia!\n";
                 Utils::tekanEnter();
                 break;
         }
 
     } while (pilih != 0);
+}
+
+void HapusAkun(const User& UserAktif, NodePendonor*& Head) {
+    Utils::bersihkanLayar();
+
+    string konfirmasi;
+
+    cout << "\n========================================\n";
+    cout << "             HAPUS AKUN\n";
+    cout << "========================================\n";
+    cout << "Username : " << UserAktif.Username << endl;
+
+    cout << "\nPERINGATAN!\n";
+    cout << "Semua data akun akan dihapus permanen.\n";
+    cout << "Data profil dan riwayat donor juga ikut terhapus.\n";
+
+    cout << "\nKetik 'HAPUS' untuk konfirmasi: ";
+    getline(cin, konfirmasi);
+
+    if (konfirmasi != "HAPUS") {
+        cout << "\n[!] Penghapusan akun dibatalkan.\n";
+        Utils::tekanEnter();
+        return;
+    }
+
+    ifstream fileUser("data/Users.csv");
+    ofstream tempUser("data/temp_Users.csv");
+
+    string baris;
+
+    while (getline(fileUser, baris)) {
+        stringstream ss(baris);
+
+        string username;
+        getline(ss, username, ',');
+
+        if (username != UserAktif.Username) {
+            tempUser << baris << endl;
+        }
+    }
+
+    fileUser.close();
+    tempUser.close();
+
+    remove("data/Users.csv");
+    rename("data/temp_Users.csv", "data/Users.csv");
+
+    ifstream filePendonor("data/Pendonor.csv");
+    ofstream tempPendonor("data/temp_Pendonor.csv");
+
+    while (getline(filePendonor, baris)) {
+        stringstream ss(baris);
+
+        string username;
+        getline(ss, username, ',');
+
+        if (username != UserAktif.Username) {
+            tempPendonor << baris << endl;
+        }
+    }
+
+    filePendonor.close();
+    tempPendonor.close();
+
+    remove("data/Pendonor.csv");
+    rename("data/temp_Pendonor.csv", "data/Pendonor.csv");
+
+    ifstream fileRiwayat("data/Riwayat.csv");
+    ofstream tempRiwayat("data/temp_Riwayat.csv");
+
+    while (getline(fileRiwayat, baris)) {
+        stringstream ss(baris);
+
+        string username;
+        getline(ss, username, ',');
+
+        if (username != UserAktif.Username) {
+            tempRiwayat << baris << endl;
+        }
+    }
+
+    fileRiwayat.close();
+    tempRiwayat.close();
+
+    remove("data/Riwayat.csv");
+    rename("data/temp_Riwayat.csv", "data/Riwayat.csv");
+
+    NodePendonor* hapus = Head;
+    NodePendonor* prev = nullptr;
+
+    while (hapus != nullptr) {
+        if (hapus->Data.Username == UserAktif.Username) {
+
+            if (prev == nullptr) {
+                Head = hapus->Next;
+            } else {
+                prev->Next = hapus->Next;
+            }
+
+            delete hapus;
+            break;
+        }
+
+        prev = hapus;
+        hapus = hapus->Next;
+    }
+
+    cout << "\n[✓] Akun berhasil dihapus.\n";
+    cout << "[✓] Anda telah logout.\n";
+
+    Utils::tekanEnter();
 }
