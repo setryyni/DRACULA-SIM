@@ -23,14 +23,6 @@ namespace Utils {
         cin.get();
     }
 
-    bool isAngka(string input) {
-        if (input.empty()) return false;
-        for (char c : input) {
-            if (!isdigit(c)) return false;
-        }
-        return true;
-    }
-
     int hitungSelisihHari(string tanggalTerakhir) {
         if (tanggalTerakhir == "" || tanggalTerakhir == "-") {
             return 999;
