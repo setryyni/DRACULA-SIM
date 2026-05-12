@@ -11,6 +11,6 @@ void EditProfil(User& UserAktif, NodePendonor*& Head);
 void cekJadwal(const User& UserAktif);
 void riwayatDonor(const User& UserAktif);
 void edukasi();
-void HapusAkun(const User& UserAktif, NodePendonor*& Head);
+void HapusAkun(const User& UserAktif, NodePendonor*& Head, bool& akunTerhapus);
 
 #endif

@@ -48,10 +48,15 @@ void menuUser(User& UserAktif, NodePendonor*& Head) {
             case 4:
                 edukasi();
                 break;
-            case 5:
-                HapusAkun(UserAktif, Head);
-                lanjut = false;
+            case 5: {
+                bool akunTerhapus = false;
+                HapusAkun(UserAktif, Head, akunTerhapus);
+
+                if (akunTerhapus) {
+                    lanjut = false;
+                }
                 break;
+            }
             case 6:
                 cout << "\nLogout berhasil. Sampai jumpa!\n";
                 lanjut = false;
@@ -658,7 +663,7 @@ void edukasi() {
     } while (pilih != 0);
 }
 
-void HapusAkun(const User& UserAktif, NodePendonor*& Head) {
+void HapusAkun(const User& UserAktif, NodePendonor*& Head, bool& akunTerhapus) {
     Utils::bersihkanLayar();
 
     cout << "\n========================================\n";
@@ -668,13 +673,21 @@ void HapusAkun(const User& UserAktif, NodePendonor*& Head) {
     cout << "\nPERINGATAN!\n";
     cout << "Semua data akun akan dihapus permanen.\n";
     cout << "Data profil dan riwayat donor juga ikut terhapus.\n";
-    cout << "\nKetik 'HAPUS' untuk konfirmasi: ";
+    cout << "\nKetik 'HAPUS' untuk konfirmasi\n";
+    cout << "Ketik '0' untuk batal\n";
+    cout << "Input : ";
 
     string konfirmasi;
     getline(cin, konfirmasi);
 
+    if (konfirmasi == "0") {
+    cout << "\n[!] Penghapusan akun dibatalkan.\n";
+    Utils::tekanEnter();
+    return;
+    }
+
     if (konfirmasi != "HAPUS") {
-        cout << "\n[!] Penghapusan akun dibatalkan.\n";
+        cout << "\n[!] Konfirmasi salah!\n";
         Utils::tekanEnter();
         return;
     }
@@ -734,5 +747,7 @@ void HapusAkun(const User& UserAktif, NodePendonor*& Head) {
 
     cout << "\n[OK] Akun berhasil dihapus.\n";
     cout << "[OK] Anda telah logout.\n";
+
+    akunTerhapus = true;
     Utils::tekanEnter();
 }
